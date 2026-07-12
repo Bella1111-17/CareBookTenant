@@ -1,0 +1,44 @@
+﻿node_modules
+dist
+coverage
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+.turbo
+.cache
+.env
+.env.local
+.envrc
+.direnv
+apps/*/node_modules
+apps/*/dist
+apps/*/.output
+apps/*/.turbo
+apps/*/.vite
+apps/wechat-miniprogram/.hbuilderx
+apps/wechat-miniprogram/dist
+apps/wechat-miniprogram/dev-dist
+apps/wechat-miniprogram/.temp
+apps/admin-dashboard/.vite
+apps/server-api/.nestjs-cli.json
+apps/wechat-miniprogram/src/manifest.json
+apps/wechat-miniprogram/src/pages.json
+bun.lockb
+apps/server/secrets/
+
+# Repomix
+repomix-index.xml
+repomix.config.json
+
+# 个人临时文件
+*.tmp
+*.temp
+tmp/
+temp/
+
+# 数据库dump文件
+*.sql.dump
+local_dump.sql
+dump*.sql
+

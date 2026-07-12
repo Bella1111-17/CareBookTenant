@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "skills": {
+    "dify-dsl-generator": {
+      "source": "wwwzhouhui/skills_collection",
+      "sourceType": "github",
+      "computedHash": "5a9adf43c64ebfa3cb2f106d2a1b839ee71d9826141cb7568e0cdaeb46d6bb5f"
+    },
+    "echarts-visualization-guide": {
+      "source": "wentorai/research-plugins",
+      "sourceType": "github",
+      "computedHash": "7182cd6b320d37a736cca78c876d53a283c946117e9000260748b8612ac0f301"
+    },
+    "mermaid-expert": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "6d4c9bd239519774c1c28c9e0124d4f9f35a1d0091277b72aec1f3ebca440bed"
+    },
+    "uni-app": {
+      "source": "uview-pro/skills",
+      "sourceType": "github",
+      "skillPath": "skills/uni-app/SKILL.md",
+      "computedHash": "8b7e5cd901ef4229652729ccbee7b25b750df5cfa4bac3469ab41ecca6629d8d"
+    },
+    "uview-pro": {
+      "source": "uview-pro/skills",
+      "sourceType": "github",
+      "skillPath": "skills/uview-pro/SKILL.md",
+      "computedHash": "c9240e59794f4336390e6b4dcd3f770e442cdeb6d10e1e17ed7e11c58d7c8977"
+    }
+  }
+}

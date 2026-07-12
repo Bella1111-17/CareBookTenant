@@ -1,0 +1,24 @@
+{
+  "name": "carebook-tob-tenant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CareBook ToB tenant platform monorepo for API service and admin web.",
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "dev:api": "pnpm --dir apps/server start:dev",
+    "dev:admin": "pnpm --dir apps/admin-vue3 dev",
+    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:admin\"",
+    "build": "pnpm --dir apps/server build && pnpm --dir apps/admin-vue3 build:prod",
+    "lint": "pnpm --dir apps/server lint",
+    "format": "pnpm --dir apps/server format"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "unconfig": "7.3.2",
+      "bin-wrapper": "npm:bin-wrapper-china"
+    }
+  }
+}
