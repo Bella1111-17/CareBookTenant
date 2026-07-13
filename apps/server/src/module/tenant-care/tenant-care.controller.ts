@@ -9,6 +9,8 @@ import {
   ListTenantBindingDto,
   ListTenantCaregiverDto,
   ListTenantDailyReportDto,
+  ListTenantDeviceEventDto,
+  ListTenantGpsDto,
   ListTenantRecordDto,
   TenantScopedPagingDto,
   UnbindTenantBadgeDto,
@@ -119,6 +121,18 @@ export class TenantCareController {
   @Get('/record/list')
   listRecords(@Query() query: ListTenantRecordDto) {
     return this.tenantCareService.listRecords(query);
+  }
+
+  @ApiOperation({ summary: '租户设备GPS定位列表' })
+  @Get('/gps/list')
+  listGpsLogs(@Query() query: ListTenantGpsDto) {
+    return this.tenantCareService.listGpsLogs(query);
+  }
+
+  @ApiOperation({ summary: '租户设备事件列表' })
+  @Get('/event/list')
+  listDeviceEvents(@Query() query: ListTenantDeviceEventDto) {
+    return this.tenantCareService.listDeviceEvents(query);
   }
 
   @ApiOperation({ summary: '生成租户AI日报' })

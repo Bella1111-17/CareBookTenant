@@ -37,6 +37,7 @@
     </el-row>
 
     <el-table v-loading="loading" :data="caregiverList">
+      <el-table-column label="护工ID" width="90" align="center" prop="id" />
       <el-table-column label="姓名" min-width="140" prop="realName" />
       <el-table-column label="手机号" width="150" prop="phone" />
       <el-table-column label="护理单元" min-width="160">

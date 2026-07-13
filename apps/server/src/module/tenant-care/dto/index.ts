@@ -4,80 +4,80 @@ import { Transform, Type } from 'class-transformer';
 import { PagingDto } from 'src/common/dto';
 
 export class TenantScopedPagingDto extends PagingDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   tenantId?: string;
 }
 
 export class ListTenantCaregiverDto extends TenantScopedPagingDto {
-  @ApiPropertyOptional({ description: '姓名/手机号关键字' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   keyword?: string;
 
-  @ApiPropertyOptional({ description: '护理单元ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   orgUnitId?: number;
 
-  @ApiPropertyOptional({ description: '状态 0启用 1停用' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsIn(['0', '1'])
   status?: string;
 }
 
 export class CreateTenantCaregiverDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiProperty({ description: '护工姓名' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @IsString()
   realName: string;
 
-  @ApiPropertyOptional({ description: '手机号' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   phone?: string;
 
-  @ApiPropertyOptional({ description: '护理单元ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   orgUnitId?: number;
 
-  @ApiPropertyOptional({ description: '状态 0启用 1停用' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsIn(['0', '1'])
   status?: string;
 
-  @ApiPropertyOptional({ description: '资质说明' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   qualification?: string;
 
-  @ApiPropertyOptional({ description: '健康证材料' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   healthCertificate?: string;
 
-  @ApiPropertyOptional({ description: '技能标签' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsArray()
   skillTags?: string[];
 
-  @ApiPropertyOptional({ description: '备注' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   remark?: string;
 }
 
 export class UpdateTenantCaregiverDto extends CreateTenantCaregiverDto {
-  @ApiProperty({ description: '护工ID' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsInt()
@@ -85,36 +85,36 @@ export class UpdateTenantCaregiverDto extends CreateTenantCaregiverDto {
 }
 
 export class CreateTenantOrgUnitDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiProperty({ description: '组织/护理单元名称' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @IsString()
   unitName: string;
 
-  @ApiPropertyOptional({ description: '父级组织ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   parentId?: number;
 
-  @ApiPropertyOptional({ description: '排序' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   sortOrder?: number;
 
-  @ApiPropertyOptional({ description: '状态 0启用 1停用' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsIn(['0', '1'])
   status?: string;
 }
 
 export class UpdateTenantOrgUnitDto extends CreateTenantOrgUnitDto {
-  @ApiProperty({ description: '组织/护理单元ID' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsInt()
@@ -122,47 +122,47 @@ export class UpdateTenantOrgUnitDto extends CreateTenantOrgUnitDto {
 }
 
 export class BindTenantBadgeDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiProperty({ description: '租户护工ID' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsInt()
   tenantCaregiverId: number;
 
-  @ApiProperty({ description: '设备编号' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @IsString()
   deviceNo: string;
 }
 
 export class CreateTenantDeviceDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiProperty({ description: '设备编号' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @IsString()
   deviceNo: string;
 
-  @ApiPropertyOptional({ description: '状态 0启用 1停用' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsIn(['0', '1'])
   status?: string;
 
-  @ApiPropertyOptional({ description: '备注' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   remark?: string;
 }
 
 export class UpdateTenantDeviceDto extends CreateTenantDeviceDto {
-  @ApiProperty({ description: '设备ID' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsInt()
@@ -170,80 +170,146 @@ export class UpdateTenantDeviceDto extends CreateTenantDeviceDto {
 }
 
 export class UnbindTenantBadgeDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiProperty({ description: '设备编号' })
+  @ApiProperty({ description: '' })
   @IsNotEmpty()
   @IsString()
   deviceNo: string;
 }
 
 export class ListTenantBindingDto extends TenantScopedPagingDto {
-  @ApiPropertyOptional({ description: '设备编号' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   deviceNo?: string;
 
-  @ApiPropertyOptional({ description: '护工姓名/手机号' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   keyword?: string;
 
-  @ApiPropertyOptional({ description: '是否当前有效绑定' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @Transform(({ value }) => value === true || value === 'true')
   isCurrent?: boolean;
 }
 
 export class ListTenantRecordDto extends TenantScopedPagingDto {
-  @ApiPropertyOptional({ description: '设备编号' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   deviceNo?: string;
 
-  @ApiPropertyOptional({ description: 'ASR状态' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   asrStatus?: string;
 
-  @ApiPropertyOptional({ description: '隔离状态 NORMAL/TENANT_UNRESOLVED' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   isolationStatus?: string;
 }
 
-export class GenerateTenantDailyReportDto {
-  @ApiPropertyOptional({ description: '平台管理员指定租户ID' })
-  @IsOptional()
-  @IsString()
-  tenantId?: string;
-
-  @ApiPropertyOptional({ description: '设备编号，不传则批量生成' })
+export class ListTenantGpsDto extends TenantScopedPagingDto {
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsString()
   deviceNo?: string;
 
-  @ApiProperty({ description: '日报日期 YYYY-MM-DD' })
-  @IsDateString()
-  dateStr: string;
-}
-
-export class ListTenantDailyReportDto extends TenantScopedPagingDto {
-  @ApiPropertyOptional({ description: '设备编号' })
-  @IsOptional()
-  @IsString()
-  deviceNo?: string;
-
-  @ApiPropertyOptional({ description: '租户护工ID' })
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   tenantCaregiverId?: number;
 
-  @ApiPropertyOptional({ description: '日报日期 YYYY-MM-DD' })
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsDateString()
+  beginTime?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsDateString()
+  endTime?: string;
+}
+
+export class ListTenantDeviceEventDto extends TenantScopedPagingDto {
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  deviceNo?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  eventType?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  eventStatus?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  tenantCaregiverId?: number;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsDateString()
+  beginTime?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsDateString()
+  endTime?: string;
+}
+
+export class GenerateTenantDailyReportDto {
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  tenantId?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  deviceNo?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  fileName?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  allowUnboundAnalysis?: boolean;
+
+  @ApiProperty({ description: '' })
+  @IsDateString()
+  dateStr: string;
+}
+
+export class ListTenantDailyReportDto extends TenantScopedPagingDto {
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @IsString()
+  deviceNo?: string;
+
+  @ApiPropertyOptional({ description: '' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  tenantCaregiverId?: number;
+
+  @ApiPropertyOptional({ description: '' })
   @IsOptional()
   @IsDateString()
   dateStr?: string;

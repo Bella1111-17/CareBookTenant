@@ -34,9 +34,13 @@
     </el-form>
 
     <el-table v-loading="loading" :data="recordList">
-      <el-table-column label="ID" width="70" align="center" prop="id" />
+      <el-table-column label="ID" width="70" align="center">
+        <template #default="{ $index }">{{ recordIndex($index) }}</template>
+      </el-table-column>
       <el-table-column label="设备号" width="150" prop="deviceNo" show-overflow-tooltip />
-      <el-table-column label="租户护工ID" width="120" align="center" prop="tenantCaregiverId" />
+      <el-table-column label="护工ID" width="120" align="center">
+        <template #default="{ row }">{{ row.tenantCaregiverId || '——' }}</template>
+      </el-table-column>
       <el-table-column label="文件名" min-width="220" prop="fileName" show-overflow-tooltip />
       <el-table-column label="切片" width="90" align="center" prop="chunkIndex" />
       <el-table-column label="开始时间" width="170" align="center">
@@ -68,7 +72,7 @@
     <el-dialog title="录音详情" v-model="detailOpen" width="760px" append-to-body>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="设备号">{{ detail.deviceNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="租户护工ID">{{ detail.tenantCaregiverId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="护工ID">{{ detail.tenantCaregiverId || '——' }}</el-descriptions-item>
         <el-descriptions-item label="文件名" :span="2">{{ detail.fileName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="隔离状态">{{ isolationLabel(detail.isolationStatus) }}</el-descriptions-item>
         <el-descriptions-item label="隔离原因">{{ detail.isolationReason || '-' }}</el-descriptions-item>
@@ -123,6 +127,10 @@ function asrLabel(status) {
 
 function isolationLabel(status) {
   return { NORMAL: '正常', TENANT_UNRESOLVED: '租户未解析' }[status] || status || '-'
+}
+
+function recordIndex(index) {
+  return (Number(queryParams.value.pageNum || 1) - 1) * Number(queryParams.value.pageSize || 10) + index + 1
 }
 
 function loadTenantOptions() {

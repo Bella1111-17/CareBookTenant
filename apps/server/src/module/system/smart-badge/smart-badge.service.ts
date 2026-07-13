@@ -226,6 +226,11 @@ export class SmartBadgeService {
     return this.deviceRepo.save(created);
   }
 
+  private rejectUnresolvedDeviceTenant(deviceNo: string, dataType: string) {
+    this.logger.warn(`[tenant-isolation] reject ${dataType} for unresolved device tenant: ${deviceNo}`);
+    return ResultData.fail(400, `设备 ${deviceNo} 未识别租户归属，${dataType} 未写入业务表`);
+  }
+
   private attachReportCard<T extends NurseDailyReportEntity>(report: T): T & { reportCard: Record<string, any> } {
     if (!report) return report as T & { reportCard: Record<string, any> };
     return {
@@ -446,6 +451,7 @@ export class SmartBadgeService {
   }
 
   async handleGps(data: GpsPushData, deviceNo: string, userId: number | null, tenantId: string | null) {
+    if (!tenantId) return this.rejectUnresolvedDeviceTenant(deviceNo, 'GPS');
     const gps = this.gpsLogRepo.create({
       tenantId,
       deviceNo,
@@ -463,6 +469,7 @@ export class SmartBadgeService {
   }
 
   async handleLoginLog(data: LoginLogPushData, deviceNo: string, userId: number | null, tenantId: string | null) {
+    if (!tenantId) return this.rejectUnresolvedDeviceTenant(deviceNo, 'login');
     const event = this.eventLogRepo.create({
       tenantId,
       deviceNo,
@@ -478,6 +485,7 @@ export class SmartBadgeService {
   }
 
   async handleControlLog(data: ControlLogPushData, deviceNo: string, userId: number | null, tenantId: string | null) {
+    if (!tenantId) return this.rejectUnresolvedDeviceTenant(deviceNo, 'control');
     const nameMap: Record<string, string> = {
       '2001': '开始录音',
       '2004': '远程关机重启',
@@ -500,6 +508,7 @@ export class SmartBadgeService {
   }
 
   async handleHeartbeatLog(data: HeartbeatLogPushData, deviceNo: string, userId: number | null, tenantId: string | null) {
+    if (!tenantId) return this.rejectUnresolvedDeviceTenant(deviceNo, 'heartbeat');
     const storage = data.remainStorageSize != null ? `${(data.remainStorageSize / 1024 / 1024).toFixed(1)}GB` : '?';
     const event = this.eventLogRepo.create({
       tenantId,
@@ -516,6 +525,7 @@ export class SmartBadgeService {
   }
 
   async handleDebugLog(data: DebugLogPushData, deviceNo: string, userId: number | null, tenantId: string | null) {
+    if (!tenantId) return this.rejectUnresolvedDeviceTenant(deviceNo, 'debug');
     const event = this.eventLogRepo.create({
       tenantId,
       deviceNo,

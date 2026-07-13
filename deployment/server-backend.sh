@@ -7,10 +7,11 @@ set -euo pipefail
 
 SERVER_USER="root"
 SERVER_IP="101.133.170.55"
-SERVER_PATH="/www/wwwroot/admin.care.zbcare.cn/server"
-SERVER_LOG="/www/wwwlogs/admin.care.zbcare.cn"
+SERVER_PATH="/www/wwwroot/admintenant.care.zbcare.cn/server"
+SERVER_LOG="/www/wwwlogs/admintenant.care.zbcare.cn"
 NODE_BIN="/www/server/nodejs/v24.17.0/bin"
 REMOTE_TMP="/tmp/deploy_server.tar.gz"
+REMOTE_ENV_TMP="/tmp/deploy_server.env"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR_PARENT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -58,14 +59,20 @@ echo ""
 echo "4. Uploading and deploying code..."
 
 scp "$PACK_NAME" "${SERVER_USER}@${SERVER_IP}:${REMOTE_TMP}"
+if [ -f "${SCRIPT_DIR_PARENT}/.env" ]; then
+    scp "${SCRIPT_DIR_PARENT}/.env" "${SERVER_USER}@${SERVER_IP}:${REMOTE_ENV_TMP}"
+else
+    echo "Root .env not found; remote environment variables must already be configured"
+fi
 
 ssh "${SERVER_USER}@${SERVER_IP}" bash -s <<'REMOTE_EOF'
 set -euo pipefail
 
 export PATH=/www/server/nodejs/v24.17.0/bin:$PATH
-BASE="/www/wwwroot/admin.care.zbcare.cn/server"
-LOG="/www/wwwlogs/admin.care.zbcare.cn"
+BASE="/www/wwwroot/admintenant.care.zbcare.cn/server"
+LOG="/www/wwwlogs/admintenant.care.zbcare.cn"
 REMOTE_TMP="/tmp/deploy_server.tar.gz"
+REMOTE_ENV_TMP="/tmp/deploy_server.env"
 
 echo "   Extracting..."
 mkdir -p "$BASE" "$LOG"
@@ -77,6 +84,10 @@ find "$BASE" -mindepth 1 -maxdepth 1 \
 
 tar -xzf "$REMOTE_TMP" -C "$BASE"
 rm -f "$REMOTE_TMP"
+if [ -f "$REMOTE_ENV_TMP" ]; then
+    mv "$REMOTE_ENV_TMP" "$BASE/.env"
+    chmod 600 "$BASE/.env"
+fi
 
 mkdir -p "$BASE/public" "$BASE/upload"
 
@@ -86,7 +97,7 @@ pnpm install --prod --frozen-lockfile=false --ignore-scripts
 echo "   Dependencies installed"
 
 echo "   Restarting service..."
-OLD_PID=$(lsof -ti:8080 2>/dev/null || true)
+OLD_PID=$(lsof -ti:8081 2>/dev/null || true)
 if [ -n "$OLD_PID" ]; then
     OLD_CMD=$(cat "/proc/$OLD_PID/cmdline" 2>/dev/null | tr '\0' ' ' || true)
     if echo "$OLD_CMD" | grep -qi 'node'; then
@@ -94,7 +105,7 @@ if [ -n "$OLD_PID" ]; then
         sleep 1
         echo "   Stopped old node process PID: $OLD_PID"
     else
-        echo "   Port 8080 occupied by non-node process, refusing to kill:"
+        echo "   Port 8081 occupied by non-node process, refusing to kill:"
         ps -fp "$OLD_PID" || true
         exit 1
     fi
@@ -106,8 +117,8 @@ nohup node main > "$LOG/server.out.log" 2>&1 </dev/null &
 
 for i in $(seq 1 15); do
     sleep 2
-    if curl -fsS "http://127.0.0.1:8080/prod-api/swagger-ui/" >/dev/null 2>&1; then
-        NEW_PID=$(lsof -ti:8080 2>/dev/null || true)
+    if curl -fsS "http://127.0.0.1:8081/prod-api/swagger-ui/" >/dev/null 2>&1; then
+        NEW_PID=$(lsof -ti:8081 2>/dev/null || true)
         echo "   Service started PID: ${NEW_PID:-unknown}"
         echo "   Health check passed on attempt $i"
         exit 0

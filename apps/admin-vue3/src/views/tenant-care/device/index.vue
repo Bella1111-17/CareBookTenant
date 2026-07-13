@@ -28,6 +28,7 @@
         </el-form>
 
         <el-table v-loading="deviceLoading" :data="deviceList">
+          <el-table-column label="设备ID" width="90" align="center" prop="id" />
           <el-table-column label="设备号" min-width="180" prop="deviceNo" />
           <el-table-column label="租户" min-width="160" prop="tenantId" v-if="isPlatformUser" />
           <el-table-column label="绑定状态" width="120" align="center">

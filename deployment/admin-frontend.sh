@@ -7,7 +7,7 @@ set -euo pipefail
 
 SERVER_USER="root"
 SERVER_IP="101.133.170.55"
-SERVER_PATH="/www/wwwroot/admin.care.zbcare.cn"
+SERVER_PATH="/www/wwwroot/admintenant.care.zbcare.cn"
 REMOTE_TMP="/tmp/deploy_admin.tar.gz"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -49,7 +49,7 @@ scp "$PACK_NAME" "${SERVER_USER}@${SERVER_IP}:${REMOTE_TMP}"
 ssh "${SERVER_USER}@${SERVER_IP}" bash -s <<'REMOTE_EOF'
 set -euo pipefail
 
-BASE="/www/wwwroot/admin.care.zbcare.cn"
+BASE="/www/wwwroot/admintenant.care.zbcare.cn"
 REMOTE_TMP="/tmp/deploy_admin.tar.gz"
 STAGE_DIR="${BASE}_frontend_stage"
 BACKUP_DIR="${BASE}_frontend_backup"
@@ -85,6 +85,6 @@ REMOTE_EOF
 echo ""
 echo "=========================================="
 echo "  Admin deployment complete"
-echo "  URL: https://admin.care.zbcare.cn"
+echo "  URL: https://admintenant.care.zbcare.cn"
 echo "=========================================="
 echo ""

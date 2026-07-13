@@ -60,6 +60,14 @@ export function listTenantRecords(query) {
   return request({ url: '/tenant-care/record/list', method: 'get', params: query })
 }
 
+export function listTenantGpsLogs(query) {
+  return request({ url: '/tenant-care/gps/list', method: 'get', params: query })
+}
+
+export function listTenantDeviceEvents(query) {
+  return request({ url: '/tenant-care/event/list', method: 'get', params: query })
+}
+
 export function generateTenantDailyReport(data) {
   return request({ url: '/tenant-care/daily-report/generate', method: 'post', data })
 }

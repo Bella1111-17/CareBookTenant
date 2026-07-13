@@ -7,12 +7,7 @@ type TenantScopeOptions = {
   requestedTenantId?: string | null;
 };
 
-export function applyTenantScope<T>(
-  qb: SelectQueryBuilder<T>,
-  alias: string,
-  tenantContextService: TenantContextService,
-  options: TenantScopeOptions = {},
-): SelectQueryBuilder<T> {
+export function applyTenantScope<T>(qb: SelectQueryBuilder<T>, alias: string, tenantContextService: TenantContextService, options: TenantScopeOptions = {}): SelectQueryBuilder<T> {
   const tenantColumn = options.tenantColumn || 'tenantId';
   const requestedTenantId = String(options.requestedTenantId || '').trim();
   const tenantId = tenantContextService.getTenantId();

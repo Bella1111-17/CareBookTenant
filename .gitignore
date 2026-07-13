@@ -41,4 +41,4 @@ temp/
 *.sql.dump
 local_dump.sql
 dump*.sql
-
+*.rdb

@@ -1,13 +1,13 @@
 # ToB tenant platform production config
 app:
-  prefix: ''
+  prefix: '/prod-api'
   port: 8081
   logger:
-    dir: '/www/wwwlogs/tenant-api.care.zbcare.cn'
+    dir: '/www/wwwlogs/admintenant.care.zbcare.cn'
   file:
     isLocal: false
-    location: '/www/wwwroot/tenant-api.care.zbcare.cn/upload'
-    domain: 'https://tenant-api.care.zbcare.cn'
+    location: '/www/wwwroot/admintenant.care.zbcare.cn/server/upload'
+    domain: 'https://admintenant.care.zbcare.cn'
     serveRoot: '/upload'
     maxSize: 10
 
@@ -21,10 +21,10 @@ oss:
 
 db:
   postgres:
-    host: '127.0.0.1'
-    username: 'carebook'
+    host: '101.133.170.55'
+    username: 'tenant_admin'
     password: '${TOB_POSTGRES_PASSWORD}'
-    database: 'carebook_tob_admin'
+    database: 'carebook_tenant'
     port: 5432
     logger: 'file'
     logging: false
@@ -63,7 +63,7 @@ hardwareAudio:
   appId: '${TOB_HARDWARE_APP_ID}'
   appSecret: '${TOB_HARDWARE_APP_SECRET}'
   callbackSecret: '${TOB_HARDWARE_CALLBACK_SECRET}'
-  publicDomain: 'https://tenant-api.care.zbcare.cn'
+  publicDomain: 'https://admintenant.care.zbcare.cn'
   ossPrefix: 'hardware-audio'
 
 dashscope:

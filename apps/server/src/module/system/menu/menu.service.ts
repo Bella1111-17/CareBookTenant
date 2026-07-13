@@ -17,6 +17,9 @@ const TENANT_EXCLUDED_PERM_PREFIXES = ['system:tenant:'];
 const TENANT_ALLOWED_PATH_PREFIXES = ['tenant-care', '/tenant-care'];
 const TENANT_ALLOWED_PERM_PREFIXES = ['tenant-care:'];
 const TENANT_ENTRY_PATH_PREFIXES = ['tenant-care', '/tenant-care'];
+const OBSOLETE_SMART_BADGE_PATH_PREFIXES = ['smart-badge', '/smart-badge', 'system/smart-badge', '/system/smart-badge'];
+const OBSOLETE_SMART_BADGE_COMPONENT_PREFIXES = ['system/smart-badge/'];
+const OBSOLETE_SMART_BADGE_PERM_PREFIXES = ['system:badge:'];
 
 @Injectable()
 export class MenuService {
@@ -132,6 +135,18 @@ export class MenuService {
     return TENANT_EXCLUDED_PATHS.has(path) || TENANT_EXCLUDED_PERM_PREFIXES.some((prefix) => perms.startsWith(prefix));
   }
 
+  private isObsoleteSmartBadgeMenu(menu: SysMenuEntity) {
+    const path = String(menu.path || '').trim();
+    const component = String(menu.component || '').trim();
+    const perms = String(menu.perms || '').trim();
+    return (
+      (menu.menuName === '智能工牌' && path === 'badge') ||
+      OBSOLETE_SMART_BADGE_PATH_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)) ||
+      OBSOLETE_SMART_BADGE_COMPONENT_PREFIXES.some((prefix) => component.startsWith(prefix)) ||
+      OBSOLETE_SMART_BADGE_PERM_PREFIXES.some((prefix) => perms.startsWith(prefix))
+    );
+  }
+
   private isTenantAllowedMenu(menu: SysMenuEntity) {
     const path = String(menu.path || '').trim();
     const perms = String(menu.perms || '').trim();
@@ -215,7 +230,8 @@ export class MenuService {
         orderNum: 'ASC',
       },
     });
-    const filteredMenuList = currentUser?.userScope === TENANT_USER_SCOPE ? this.normalizeTenantMenuList(menuList) : menuList;
+    const activeMenuList = menuList.filter((item) => !this.isObsoleteSmartBadgeMenu(item));
+    const filteredMenuList = currentUser?.userScope === TENANT_USER_SCOPE ? this.normalizeTenantMenuList(activeMenuList) : activeMenuList;
     const routerMenuList = filteredMenuList.filter((item) => item.menuType !== TYPE_BUTTON);
     // 构建前端需要的菜单树
     const menuTree = buildMenus(routerMenuList);

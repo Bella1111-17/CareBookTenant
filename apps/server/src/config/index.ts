@@ -4,8 +4,8 @@ import * as yaml from 'js-yaml';
 import { join } from 'path';
 
 // 加载根目录的 .env 文件
-config({ path: join(__dirname, '../../../../.env') });
-console.log('TOB_JWT_SECRET from env:', process.env.TOB_JWT_SECRET);
+config({ path: join(process.cwd(), '.env') });
+config({ path: join(__dirname, '../../../../.env'), override: false });
 
 const configFileNameObj = {
   development: 'dev',

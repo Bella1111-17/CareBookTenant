@@ -31,7 +31,12 @@
     <el-table v-loading="loading" :data="reportList">
       <el-table-column label="ID" width="70" align="center" prop="id" />
       <el-table-column label="设备号" width="150" prop="deviceNo" show-overflow-tooltip />
-      <el-table-column label="护工ID" width="100" align="center" prop="tenantCaregiverId" />
+      <el-table-column label="护工ID" width="100" align="center">
+        <template #default="{ row }">{{ row.tenantCaregiverId || '——' }}</template>
+      </el-table-column>
+      <el-table-column label="护工名称" width="120" align="center" prop="caregiverName">
+        <template #default="{ row }">{{ row.caregiverName || '-' }}</template>
+      </el-table-column>
       <el-table-column label="日报日期" width="120" align="center" prop="reportDate" />
       <el-table-column label="切片数" width="90" align="center" prop="totalChunks" />
       <el-table-column label="录音时长" width="110" align="center">
@@ -62,7 +67,10 @@
 
     <el-dialog title="生成单设备租户日报" v-model="generateOpen" width="460px" append-to-body>
       <el-alert type="warning" :closable="false" class="mb16">批量生成已临时停用。请指定租户与设备号后手动生成，避免跨租户误聚合。</el-alert>
-      <el-form ref="generateRef" :model="generateForm" :rules="generateRules" label-width="92px">
+      <el-form ref="generateRef" :model="generateForm" :rules="generateRules" label-width="110px">
+        <el-form-item label="测试模式">
+          <el-checkbox v-model="generateForm.allowUnboundAnalysis">未绑定录音测试</el-checkbox>
+        </el-form-item>
         <el-form-item v-if="isPlatformUser" label="机构" prop="tenantId">
           <el-select v-model="generateForm.tenantId" placeholder="请选择机构" filterable style="width: 100%">
             <el-option v-for="item in tenantOptions" :key="item.tenantId" :label="item.tenantName" :value="item.tenantId" />
@@ -73,6 +81,9 @@
         </el-form-item>
         <el-form-item label="日报日期" prop="dateStr">
           <el-date-picker v-model="generateForm.dateStr" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" style="width: 100%" />
+        </el-form-item>
+        <el-form-item v-if="generateForm.allowUnboundAnalysis" label="录音文件名" prop="fileName">
+          <el-input v-model="generateForm.fileName" placeholder="请输入完整 mp3 文件名" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -85,7 +96,8 @@
       <div class="detail-shell">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="设备号">{{ detail.deviceNo || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="租户护工ID">{{ detail.tenantCaregiverId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="护工ID">{{ detail.tenantCaregiverId || '——' }}</el-descriptions-item>
+          <el-descriptions-item label="护工名称">{{ detail.caregiverName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="日报日期">{{ detail.reportDate || '-' }}</el-descriptions-item>
           <el-descriptions-item label="生成状态">{{ detail.generationStatus || '-' }}</el-descriptions-item>
           <el-descriptions-item label="录音时长">{{ formatMinute(detail.totalDurationSeconds) }}</el-descriptions-item>
@@ -106,7 +118,7 @@
       <div class="analysis-layout" v-if="analysis.reportCard">
         <section class="analysis-hero">
           <div class="analysis-hero__title">{{ analysis.reportDate }} 日报分析</div>
-          <div class="analysis-hero__meta">设备 {{ analysis.deviceNo || '-' }} · 护工ID {{ analysis.tenantCaregiverId || '-' }}</div>
+          <div class="analysis-hero__meta">设备 {{ analysis.deviceNo || '-' }} · 护工ID {{ analysis.tenantCaregiverId || '——' }} · 护工 {{ analysis.caregiverName || '-' }}</div>
           <div class="analysis-hero__summary">{{ analysis.reportCard.aiSummary || analysis.summaryText || '暂无 AI 摘要' }}</div>
         </section>
         <section class="analysis-grid">
@@ -173,11 +185,34 @@ const data = reactive({
 })
 const { queryParams } = toRefs(data)
 
-const generateForm = reactive({ tenantId: undefined, deviceNo: '', dateStr: '' })
+const generateForm = reactive({ tenantId: undefined, deviceNo: '', dateStr: '', fileName: '', allowUnboundAnalysis: false })
 const generateRules = {
-  tenantId: [{ required: true, message: '请选择机构', trigger: 'change' }],
+  tenantId: [
+    {
+      validator: (_rule, value, callback) => {
+        if (isPlatformUser.value && !generateForm.allowUnboundAnalysis && !value) {
+          callback(new Error('请选择机构'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
   deviceNo: [{ required: true, message: '请输入设备号', trigger: 'blur' }],
   dateStr: [{ required: true, message: '请选择日报日期', trigger: 'change' }],
+  fileName: [
+    {
+      validator: (_rule, value, callback) => {
+        if (generateForm.allowUnboundAnalysis && !String(value || '').trim()) {
+          callback(new Error('请输入完整 mp3 文件名'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
 }
 
 function loadTenantOptions() {
@@ -257,6 +292,8 @@ function openGenerateDialog() {
     tenantId: isPlatformUser.value ? queryParams.value.tenantId : userStore.tenantId || undefined,
     deviceNo: queryParams.value.deviceNo || '',
     dateStr: queryParams.value.dateStr || proxy.parseTime(new Date(), '{y}-{m}-{d}'),
+    fileName: '',
+    allowUnboundAnalysis: false,
   })
   generateOpen.value = true
 }
@@ -265,10 +302,16 @@ function submitGenerate() {
   proxy.$refs.generateRef.validate((valid) => {
     if (!valid || generateLoading.value) return
     generateLoading.value = true
-    generateTenantDailyReport({ ...generateForm })
+    const payload = { ...generateForm }
+    if (!payload.tenantId) delete payload.tenantId
+    if (!payload.fileName) delete payload.fileName
+    generateTenantDailyReport(payload)
       .then(() => {
         proxy.$modal.msgSuccess('已提交单设备日报生成')
         generateOpen.value = false
+        if (payload.allowUnboundAnalysis && !payload.tenantId) {
+          queryParams.value.tenantId = undefined
+        }
         setTimeout(() => getList(), 1200)
       })
       .finally(() => {

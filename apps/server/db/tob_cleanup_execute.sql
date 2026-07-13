@@ -1,4 +1,4 @@
--- ToB tenant platform cleanup execution.
+﻿-- ToB tenant platform cleanup execution.
 -- REQUIRED: backup carebook_tob_admin before running this file.
 -- This script removes self-operated CareBook business data and stale menus from the imported NEW database.
 
@@ -21,8 +21,7 @@ INSERT INTO tob_cleanup_target_table (table_name, delete_order) VALUES
   ('care_service_item', 90),
   ('care_service_category', 100),
   ('care_offline_source_org', 110),
-  ('caregiver_profile', 120),
-  ('sys_carousel', 130);
+  ('caregiver_profile', 120);
 
 CREATE TEMP TABLE tob_cleanup_before (
   table_name text PRIMARY KEY,
@@ -64,14 +63,12 @@ FROM sys_menu
 WHERE perms LIKE 'care:%'
    OR perms LIKE 'payment:%'
    OR perms LIKE 'wechat:%'
-   OR perms LIKE 'system:carousel:%'
    OR perms LIKE 'system:caregiver:%'
    OR component LIKE 'care/%'
    OR component LIKE 'payment/%'
    OR component LIKE 'wechat/%'
-   OR component LIKE 'system/carousel/%'
    OR component LIKE 'system/caregiver/%'
-   OR path IN ('care', 'payment', 'wechat', 'dashboard', 'carousel');
+   OR path IN ('care', 'payment', 'wechat', 'dashboard');
 
 WITH RECURSIVE menu_tree AS (
   SELECT menu_id FROM tob_obsolete_menu
@@ -111,3 +108,4 @@ DELETE FROM sys_oper_log;
 DELETE FROM sys_job_log;
 
 COMMIT;
+

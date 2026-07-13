@@ -1704,189 +1704,6 @@
         ]
       }
     },
-    "/system/notice": {
-      "post": {
-        "operationId": "NoticeController_create",
-        "summary": "通知公告-创建",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNoticeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "通知公告"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      },
-      "put": {
-        "operationId": "NoticeController_update",
-        "summary": "通知公告-更新",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateNoticeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "通知公告"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/system/notice/list": {
-      "get": {
-        "operationId": "NoticeController_findAll",
-        "summary": "通知公告-列表",
-        "parameters": [
-          {
-            "name": "pageNum",
-            "required": true,
-            "in": "query",
-            "description": "当前分页",
-            "schema": {
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": true,
-            "in": "query",
-            "description": "每页数量",
-            "schema": {
-              "default": 10,
-              "type": "number"
-            }
-          },
-          {
-            "name": "orderByColumn",
-            "required": false,
-            "in": "query",
-            "description": "排序字段",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "isAsc",
-            "required": false,
-            "in": "query",
-            "description": "排序规则",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListNoticeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "通知公告"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/system/notice/{id}": {
-      "get": {
-        "operationId": "NoticeController_findOne",
-        "summary": "通知公告-详情",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "通知公告"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "NoticeController_remove",
-        "summary": "通知公告-删除",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "通知公告"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
     "/system/post": {
       "post": {
         "operationId": "PostController_create",
@@ -3729,387 +3546,6 @@
         ]
       }
     },
-    "/hardware/badge/callback": {
-      "post": {
-        "operationId": "SmartBadgeController_callback",
-        "summary": "工牌回调通知",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BadgeCallbackDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/bind": {
-      "post": {
-        "operationId": "SmartBadgeController_bindDevice",
-        "summary": "绑定设备到用户",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BindDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/device": {
-      "post": {
-        "operationId": "SmartBadgeController_createDevice",
-        "summary": "新增设备主档",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBadgeDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/device/update": {
-      "post": {
-        "operationId": "SmartBadgeController_updateDevice",
-        "summary": "编辑设备主档",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBadgeDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/device/delete-review": {
-      "post": {
-        "operationId": "SmartBadgeController_deleteDevice",
-        "summary": "多级校验删除设备主档",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteBadgeDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/device/restore/{id}": {
-      "post": {
-        "operationId": "SmartBadgeController_restoreDevice",
-        "summary": "恢复已删除设备主档",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/unbind": {
-      "post": {
-        "operationId": "SmartBadgeController_unbindDevice",
-        "summary": "解绑设备",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UnbindDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/device/list": {
-      "get": {
-        "operationId": "SmartBadgeController_deviceList",
-        "summary": "设备主档列表",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/binding/list": {
-      "get": {
-        "operationId": "SmartBadgeController_bindingList",
-        "summary": "设备绑定列表",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/binding/device-summary": {
-      "get": {
-        "operationId": "SmartBadgeController_bindingDeviceSummary",
-        "summary": "设备绑定概览",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/record/list": {
-      "get": {
-        "operationId": "SmartBadgeController_recordList",
-        "summary": "录音记录列表",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/gps/list": {
-      "get": {
-        "operationId": "SmartBadgeController_gpsLogList",
-        "summary": "GPS 定位日志",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/event/list": {
-      "get": {
-        "operationId": "SmartBadgeController_eventLogList",
-        "summary": "设备事件日志",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/record/{id}": {
-      "delete": {
-        "operationId": "SmartBadgeController_recordDelete",
-        "summary": "删除录音记录",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/transcribe/{id}": {
-      "post": {
-        "operationId": "SmartBadgeController_manualTranscribe",
-        "summary": "手动触发阿里云 ASR 转写",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/record/rebuild-text": {
-      "post": {
-        "operationId": "SmartBadgeController_rebuildText",
-        "summary": "从原始 JSON 重新生成带时间戳的纯文本",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/audit/report/generate": {
-      "post": {
-        "operationId": "SmartBadgeController_generateReport",
-        "summary": "生成单设备护工日报",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/audit/report/list": {
-      "get": {
-        "operationId": "SmartBadgeController_reportList",
-        "summary": "AI 日报列表",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
-    "/hardware/badge/audit/report/detail/{id}": {
-      "get": {
-        "operationId": "SmartBadgeController_reportDetail",
-        "summary": "AI 日报详情，包含大文本",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-智能工牌"
-        ]
-      }
-    },
     "/monitor/server": {
       "get": {
         "operationId": "ServerController_getInfo",
@@ -4898,6 +4334,31 @@
         ]
       }
     },
+    "/hardware/badge/callback": {
+      "post": {
+        "operationId": "SmartBadgeController_callback",
+        "summary": "护理设备数据回调",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeCallbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "硬件-护理设备回调"
+        ]
+      }
+    },
     "/tenant-care/org-unit": {
       "post": {
         "operationId": "TenantCareController_createOrgUnit",
@@ -4995,7 +4456,7 @@
             "name": "tenantId",
             "required": false,
             "in": "query",
-            "description": "平台管理员指定租户ID",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5108,7 +4569,7 @@
             "name": "tenantId",
             "required": false,
             "in": "query",
-            "description": "平台管理员指定租户ID",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5117,7 +4578,7 @@
             "name": "keyword",
             "required": false,
             "in": "query",
-            "description": "姓名/手机号关键字",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5126,7 +4587,7 @@
             "name": "orgUnitId",
             "required": false,
             "in": "query",
-            "description": "护理单元ID",
+            "description": "",
             "schema": {
               "type": "number"
             }
@@ -5135,7 +4596,7 @@
             "name": "status",
             "required": false,
             "in": "query",
-            "description": "状态 0启用 1停用",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5361,7 +4822,7 @@
             "name": "tenantId",
             "required": false,
             "in": "query",
-            "description": "平台管理员指定租户ID",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5370,7 +4831,7 @@
             "name": "deviceNo",
             "required": false,
             "in": "query",
-            "description": "设备编号",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5379,7 +4840,7 @@
             "name": "keyword",
             "required": false,
             "in": "query",
-            "description": "护工姓名/手机号",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5388,7 +4849,7 @@
             "name": "isCurrent",
             "required": false,
             "in": "query",
-            "description": "是否当前有效绑定",
+            "description": "",
             "schema": {
               "type": "boolean"
             }
@@ -5451,7 +4912,7 @@
             "name": "tenantId",
             "required": false,
             "in": "query",
-            "description": "平台管理员指定租户ID",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5460,7 +4921,7 @@
             "name": "deviceNo",
             "required": false,
             "in": "query",
-            "description": "设备编号",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5469,7 +4930,7 @@
             "name": "asrStatus",
             "required": false,
             "in": "query",
-            "description": "ASR状态",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5478,7 +4939,223 @@
             "name": "isolationStatus",
             "required": false,
             "in": "query",
-            "description": "隔离状态 NORMAL/TENANT_UNRESOLVED",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "租户护理"
+        ]
+      }
+    },
+    "/tenant-care/gps/list": {
+      "get": {
+        "operationId": "TenantCareController_listGpsLogs",
+        "summary": "租户设备GPS定位列表",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "required": true,
+            "in": "query",
+            "description": "当前分页",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": true,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "orderByColumn",
+            "required": false,
+            "in": "query",
+            "description": "排序字段",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isAsc",
+            "required": false,
+            "in": "query",
+            "description": "排序规则",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceNo",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantCaregiverId",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "beginTime",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endTime",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "租户护理"
+        ]
+      }
+    },
+    "/tenant-care/event/list": {
+      "get": {
+        "operationId": "TenantCareController_listDeviceEvents",
+        "summary": "租户设备事件列表",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "required": true,
+            "in": "query",
+            "description": "当前分页",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": true,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "orderByColumn",
+            "required": false,
+            "in": "query",
+            "description": "排序字段",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isAsc",
+            "required": false,
+            "in": "query",
+            "description": "排序规则",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceNo",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventType",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventStatus",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantCaregiverId",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "beginTime",
+            "required": false,
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endTime",
+            "required": false,
+            "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5566,7 +5243,7 @@
             "name": "tenantId",
             "required": false,
             "in": "query",
-            "description": "平台管理员指定租户ID",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5575,7 +5252,7 @@
             "name": "deviceNo",
             "required": false,
             "in": "query",
-            "description": "设备编号",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5584,7 +5261,7 @@
             "name": "tenantCaregiverId",
             "required": false,
             "in": "query",
-            "description": "租户护工ID",
+            "description": "",
             "schema": {
               "type": "number"
             }
@@ -5593,7 +5270,7 @@
             "name": "dateStr",
             "required": false,
             "in": "query",
-            "description": "日报日期 YYYY-MM-DD",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -6063,69 +5740,6 @@
           "parentId",
           "isFrame",
           "menuId"
-        ]
-      },
-      "CreateNoticeDto": {
-        "type": "object",
-        "properties": {
-          "remark": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "remark"
-        ]
-      },
-      "ListNoticeDto": {
-        "type": "object",
-        "properties": {
-          "pageNum": {
-            "type": "number",
-            "description": "当前分页",
-            "default": 1
-          },
-          "pageSize": {
-            "type": "number",
-            "description": "每页数量",
-            "default": 10
-          },
-          "params": {
-            "description": "时间范围",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateParamsDTO"
-              }
-            ]
-          },
-          "orderByColumn": {
-            "type": "string",
-            "description": "排序字段"
-          },
-          "isAsc": {
-            "type": "string",
-            "description": "排序规则"
-          }
-        },
-        "required": [
-          "pageNum",
-          "pageSize"
-        ]
-      },
-      "UpdateNoticeDto": {
-        "type": "object",
-        "properties": {
-          "remark": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "remark"
         ]
       },
       "CreatePostDto": {
@@ -6813,129 +6427,6 @@
           "status"
         ]
       },
-      "BadgeCallbackDto": {
-        "type": "object",
-        "properties": {
-          "dataType": {
-            "type": "string",
-            "description": "数据类型: Audio|Gps|AudioText|LoginLog|ControlLog|UploadLog|HeartbeatLog|DebugLog|MergeAudio"
-          },
-          "timeStamp": {
-            "type": "string",
-            "description": "时间戳"
-          },
-          "deviceNo": {
-            "type": "string",
-            "description": "设备编号"
-          },
-          "data": {
-            "type": "object",
-            "description": "业务数据体"
-          }
-        },
-        "required": [
-          "dataType",
-          "timeStamp",
-          "deviceNo",
-          "data"
-        ]
-      },
-      "BindDeviceDto": {
-        "type": "object",
-        "properties": {
-          "deviceNo": {
-            "type": "string",
-            "description": "设备号"
-          },
-          "userId": {
-            "type": "number",
-            "description": "用户 ID"
-          }
-        },
-        "required": [
-          "deviceNo",
-          "userId"
-        ]
-      },
-      "CreateBadgeDeviceDto": {
-        "type": "object",
-        "properties": {
-          "deviceNo": {
-            "type": "string",
-            "description": "设备号"
-          },
-          "status": {
-            "type": "string",
-            "description": "状态 0启用 1停用"
-          },
-          "remark": {
-            "type": "string",
-            "description": "备注"
-          }
-        },
-        "required": [
-          "deviceNo"
-        ]
-      },
-      "UpdateBadgeDeviceDto": {
-        "type": "object",
-        "properties": {
-          "deviceNo": {
-            "type": "string",
-            "description": "设备号"
-          },
-          "status": {
-            "type": "string",
-            "description": "状态 0启用 1停用"
-          },
-          "remark": {
-            "type": "string",
-            "description": "备注"
-          },
-          "id": {
-            "type": "number",
-            "description": "设备主键"
-          }
-        },
-        "required": [
-          "deviceNo",
-          "id"
-        ]
-      },
-      "DeleteBadgeDeviceDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "设备主键"
-          },
-          "confirmDeviceNo": {
-            "type": "string",
-            "description": "二次确认的设备号"
-          },
-          "reason": {
-            "type": "string",
-            "description": "删除原因"
-          }
-        },
-        "required": [
-          "id",
-          "confirmDeviceNo",
-          "reason"
-        ]
-      },
-      "UnbindDeviceDto": {
-        "type": "object",
-        "properties": {
-          "deviceNo": {
-            "type": "string",
-            "description": "设备号"
-          }
-        },
-        "required": [
-          "deviceNo"
-        ]
-      },
       "ListLoginlogDto": {
         "type": "object",
         "properties": {
@@ -7198,28 +6689,55 @@
           }
         }
       },
+      "BadgeCallbackDto": {
+        "type": "object",
+        "properties": {
+          "dataType": {
+            "type": "string",
+            "description": "数据类型: Audio|Gps|AudioText|LoginLog|ControlLog|UploadLog|HeartbeatLog|DebugLog|MergeAudio"
+          },
+          "timeStamp": {
+            "type": "string",
+            "description": "时间戳"
+          },
+          "deviceNo": {
+            "type": "string",
+            "description": "设备编号"
+          },
+          "data": {
+            "type": "object",
+            "description": "业务数据体"
+          }
+        },
+        "required": [
+          "dataType",
+          "timeStamp",
+          "deviceNo",
+          "data"
+        ]
+      },
       "CreateTenantOrgUnitDto": {
         "type": "object",
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "unitName": {
             "type": "string",
-            "description": "组织/护理单元名称"
+            "description": ""
           },
           "parentId": {
             "type": "number",
-            "description": "父级组织ID"
+            "description": ""
           },
           "sortOrder": {
             "type": "number",
-            "description": "排序"
+            "description": ""
           },
           "status": {
             "type": "string",
-            "description": "状态 0启用 1停用"
+            "description": ""
           }
         },
         "required": [
@@ -7231,27 +6749,27 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "unitName": {
             "type": "string",
-            "description": "组织/护理单元名称"
+            "description": ""
           },
           "parentId": {
             "type": "number",
-            "description": "父级组织ID"
+            "description": ""
           },
           "sortOrder": {
             "type": "number",
-            "description": "排序"
+            "description": ""
           },
           "status": {
             "type": "string",
-            "description": "状态 0启用 1停用"
+            "description": ""
           },
           "id": {
             "type": "number",
-            "description": "组织/护理单元ID"
+            "description": ""
           }
         },
         "required": [
@@ -7264,34 +6782,34 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "realName": {
             "type": "string",
-            "description": "护工姓名"
+            "description": ""
           },
           "phone": {
             "type": "string",
-            "description": "手机号"
+            "description": ""
           },
           "orgUnitId": {
             "type": "number",
-            "description": "护理单元ID"
+            "description": ""
           },
           "status": {
             "type": "string",
-            "description": "状态 0启用 1停用"
+            "description": ""
           },
           "qualification": {
             "type": "string",
-            "description": "资质说明"
+            "description": ""
           },
           "healthCertificate": {
             "type": "string",
-            "description": "健康证材料"
+            "description": ""
           },
           "skillTags": {
-            "description": "技能标签",
+            "description": "",
             "type": "array",
             "items": {
               "type": "string"
@@ -7299,7 +6817,7 @@
           },
           "remark": {
             "type": "string",
-            "description": "备注"
+            "description": ""
           }
         },
         "required": [
@@ -7311,34 +6829,34 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "realName": {
             "type": "string",
-            "description": "护工姓名"
+            "description": ""
           },
           "phone": {
             "type": "string",
-            "description": "手机号"
+            "description": ""
           },
           "orgUnitId": {
             "type": "number",
-            "description": "护理单元ID"
+            "description": ""
           },
           "status": {
             "type": "string",
-            "description": "状态 0启用 1停用"
+            "description": ""
           },
           "qualification": {
             "type": "string",
-            "description": "资质说明"
+            "description": ""
           },
           "healthCertificate": {
             "type": "string",
-            "description": "健康证材料"
+            "description": ""
           },
           "skillTags": {
-            "description": "技能标签",
+            "description": "",
             "type": "array",
             "items": {
               "type": "string"
@@ -7346,11 +6864,11 @@
           },
           "remark": {
             "type": "string",
-            "description": "备注"
+            "description": ""
           },
           "id": {
             "type": "number",
-            "description": "护工ID"
+            "description": ""
           }
         },
         "required": [
@@ -7363,19 +6881,19 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "deviceNo": {
             "type": "string",
-            "description": "设备编号"
+            "description": ""
           },
           "status": {
             "type": "string",
-            "description": "状态 0启用 1停用"
+            "description": ""
           },
           "remark": {
             "type": "string",
-            "description": "备注"
+            "description": ""
           }
         },
         "required": [
@@ -7387,23 +6905,23 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "deviceNo": {
             "type": "string",
-            "description": "设备编号"
+            "description": ""
           },
           "status": {
             "type": "string",
-            "description": "状态 0启用 1停用"
+            "description": ""
           },
           "remark": {
             "type": "string",
-            "description": "备注"
+            "description": ""
           },
           "id": {
             "type": "number",
-            "description": "设备ID"
+            "description": ""
           }
         },
         "required": [
@@ -7416,15 +6934,15 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "tenantCaregiverId": {
             "type": "number",
-            "description": "租户护工ID"
+            "description": ""
           },
           "deviceNo": {
             "type": "string",
-            "description": "设备编号"
+            "description": ""
           }
         },
         "required": [
@@ -7437,11 +6955,11 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "deviceNo": {
             "type": "string",
-            "description": "设备编号"
+            "description": ""
           }
         },
         "required": [
@@ -7453,15 +6971,23 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "平台管理员指定租户ID"
+            "description": ""
           },
           "deviceNo": {
             "type": "string",
-            "description": "设备编号，不传则批量生成"
+            "description": ""
+          },
+          "fileName": {
+            "type": "string",
+            "description": ""
+          },
+          "allowUnboundAnalysis": {
+            "type": "boolean",
+            "description": ""
           },
           "dateStr": {
             "type": "string",
-            "description": "日报日期 YYYY-MM-DD"
+            "description": ""
           }
         },
         "required": [

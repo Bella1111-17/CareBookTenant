@@ -15,7 +15,7 @@ import { TENANT_USER_SCOPE } from 'src/common/tenant/tenant.constants';
 
 @Injectable()
 export class TenantService {
-  private readonly tenantMenuTemplateIds = [230, 231, 232, 233, 234, 3300, 3301, 3302, 3303, 3310, 3311, 3320, 3321, 3322, 3323, 3324, 3330, 3340, 3341];
+  private readonly tenantMenuTemplateIds = [230, 231, 232, 233, 234, 235, 236, 3300, 3301, 3302, 3303, 3310, 3311, 3320, 3321, 3322, 3323, 3324, 3330, 3340, 3341, 3350, 3360];
 
   constructor(
     @InjectRepository(SysTenantEntity)

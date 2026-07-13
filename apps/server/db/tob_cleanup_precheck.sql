@@ -1,4 +1,4 @@
--- ToB tenant platform cleanup precheck.
+﻿-- ToB tenant platform cleanup precheck.
 -- Run this against the imported NEW database only, never against the original production database.
 
 CREATE TEMP TABLE IF NOT EXISTS tob_cleanup_target_table (
@@ -19,8 +19,7 @@ INSERT INTO tob_cleanup_target_table (table_name) VALUES
   ('care_service_item'),
   ('care_service_category'),
   ('care_offline_source_org'),
-  ('caregiver_profile'),
-  ('sys_carousel')
+  ('caregiver_profile')
 ON CONFLICT DO NOTHING;
 
 CREATE TEMP TABLE IF NOT EXISTS tob_cleanup_precheck_result (
@@ -56,14 +55,12 @@ FROM sys_menu
 WHERE perms LIKE 'care:%'
    OR perms LIKE 'payment:%'
    OR perms LIKE 'wechat:%'
-   OR perms LIKE 'system:carousel:%'
    OR perms LIKE 'system:caregiver:%'
    OR component LIKE 'care/%'
    OR component LIKE 'payment/%'
    OR component LIKE 'wechat/%'
-   OR component LIKE 'system/carousel/%'
    OR component LIKE 'system/caregiver/%'
-   OR path IN ('care', 'payment', 'wechat', 'dashboard', 'carousel');
+   OR path IN ('care', 'payment', 'wechat', 'dashboard');
 
 SELECT count(*) AS tob_kept_business_rows
 FROM (
@@ -78,3 +75,4 @@ FROM (
   UNION ALL SELECT 'tenant_badge_binding', count(*) FROM tenant_badge_binding
   UNION ALL SELECT 'tenant_daily_report', count(*) FROM tenant_daily_report
 ) kept;
+

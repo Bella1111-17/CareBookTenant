@@ -53,7 +53,7 @@ Swagger: http://localhost:8080/swagger-ui
 ### 数据库
 
 配置：`apps/server/src/config/dev.yml`（开发）、`prod.yml`（生产）
-远程 PostgreSQL：host `101.133.170.55`，port `5432`，database `nest_admin`
+远程 PostgreSQL：host `101.133.170.55`，port `5432`，database `carebook_tenant`
 
 - 金额：整数分（如 `30000` = 300 元）
 - 布尔：`char(1)` 存 `'0'`/`'1'`

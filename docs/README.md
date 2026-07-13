@@ -45,13 +45,19 @@
 
 ## 当前关键文档
 
-- `docs/product/PRD.md` — 产品需求主文档
-- `docs/product/服务退款规则.md` — 线上订单取消与退款规则
+- `docs/product/服务退款规则.md` — 线上订单取消与退款规则（保留参考）
 - `docs/engineering/服务端规范.md` — 后端 NestJS 工程规范
 - `docs/engineering/管理后台工程规范.md` — 管理后台 Vue3 工程规范
 - `docs/engineering/小程序工程规范.md` — 小程序 uni-app 工程规范
-- `docs/engineering/订单模块.md` — 订单、服务关系数据模型
 - `docs/engineering/护理订单履约日报V1实施方案.md` — 护理日报生成规则
-- `docs/integrations/微信支付V3接入设计.md` — 微信支付接入设计
 - `docs/integrations/智能工牌接口文档.md` — 智能工牌接口
 - `docs/operations/项目辅助信息.md` — 运维辅助信息
+
+## 历史文档
+
+旧版 ToC 商城、订单、支付、小程序文档已迁移至 `docs/history/`：
+
+- `history/PRD.md` — 旧版产品需求文档（已归档）
+- `history/小程序工程规范.md` — 旧版 uni-app 小程序工程规范（已归档）
+- `history/订单模块.md` — 旧版 ToC 订单与服务关系设计（已归档）
+- `history/微信支付V3接入设计.md` — 旧版微信支付接入设计（已归档）

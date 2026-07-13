@@ -185,9 +185,13 @@ export class AudioAuditService {
     );
 
     const apiKey = this.config.get<string>('dify.badgeDailyReportKey') || '';
-    const baseUrl = this.config.get<string>('dify.baseUrl') || 'https://api.dify.ai/v1';
+    const baseUrl = this.config.get<string>('dify.baseUrl') || 'http://8.153.70.109/v1';
     if (!apiKey || apiKey === 'app-xxxxxxxxxxxxxxxx') {
-      this.logger.warn('[审计] Dify Key 未配置，跳过 AI 报表生成');
+      this.logger.warn('[审计] TOB_DIFY_BADGE_DAILY_REPORT_KEY 未配置，跳过 AI 报表生成');
+      return;
+    }
+    if (/^https?:\/\//i.test(apiKey)) {
+      this.logger.warn('[审计] Dify Key 不能是 URL，请把 http://8.153.70.109/v1 配到 TOB_DIFY_BASE_URL，把 app- 开头的应用 Key 配到 TOB_DIFY_BADGE_DAILY_REPORT_KEY');
       return;
     }
 

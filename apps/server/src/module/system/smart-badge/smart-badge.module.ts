@@ -17,16 +17,7 @@ import { TenantBadgeBindingEntity } from 'src/module/tenant-care/entities/tenant
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([
-      BadgeDeviceEntity,
-      DeviceUserBindingEntity,
-      AudioRecordEntity,
-      DeviceGpsLogEntity,
-      DeviceEventLogEntity,
-      NurseDailyReportEntity,
-      UserEntity,
-      TenantBadgeBindingEntity,
-    ]),
+    TypeOrmModule.forFeature([BadgeDeviceEntity, DeviceUserBindingEntity, AudioRecordEntity, DeviceGpsLogEntity, DeviceEventLogEntity, NurseDailyReportEntity, UserEntity, TenantBadgeBindingEntity]),
   ],
   controllers: [SmartBadgeController],
   providers: [SmartBadgeService, CloudAsrService, AudioAuditService],

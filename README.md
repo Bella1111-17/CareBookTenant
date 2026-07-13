@@ -63,8 +63,8 @@ pnpm install
 
 ```bash
 # 创建数据库并导入初始数据
-psql -U postgres -c "CREATE DATABASE nest_admin;"
-psql -U postgres -d nest_admin -f apps/server/db/init.sql
+psql -U postgres -c "CREATE DATABASE carebook_tenant;"
+psql -U postgres -d carebook_tenant -f apps/server/db/init.sql
 ```
 
 ### 4. 启动服务
