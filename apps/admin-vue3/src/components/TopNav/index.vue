@@ -162,15 +162,16 @@ onMounted(() => {
   float: left;
   height: 50px !important;
   line-height: 50px !important;
-  color: #999093 !important;
+  color: #3d3520 !important;
   padding: 0 5px !important;
   margin: 0 10px !important;
 }
 
 .topmenu-container.el-menu--horizontal > .el-menu-item.is-active,
 .el-menu--horizontal > .el-sub-menu.is-active .el-submenu__title {
-  border-bottom: 2px solid #{'var(--theme)'} !important;
-  color: #303133;
+  border-bottom: 2px solid #3d3520 !important;
+  color: #3d3520 !important;
+  background: rgba(255, 255, 255, 0.24) !important;
 }
 
 /* sub-menu item */
@@ -178,7 +179,7 @@ onMounted(() => {
   float: left;
   height: 50px !important;
   line-height: 50px !important;
-  color: #999093 !important;
+  color: #3d3520 !important;
   padding: 0 5px !important;
   margin: 0 10px !important;
 }

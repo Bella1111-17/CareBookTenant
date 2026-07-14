@@ -252,9 +252,9 @@ function handleScroll() {
 .tags-view-container {
   height: 34px;
   width: 100%;
-  background: #fff;
-  border-bottom: 1px solid #d8dce5;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
+  background: #fffdf7;
+  border-bottom: 1px solid #eadfbd;
+  box-shadow: 0 1px 3px 0 rgba(120, 90, 0, 0.06);
   .tags-view-wrapper {
     .tags-view-item {
       display: inline-block;
@@ -262,9 +262,9 @@ function handleScroll() {
       cursor: pointer;
       height: 26px;
       line-height: 26px;
-      border: 1px solid #d8dce5;
-      color: #495060;
-      background: #fff;
+      border: 1px solid #eadfbd;
+      color: #5f553f;
+      background: #ffffff;
       padding: 0 8px;
       font-size: 12px;
       margin-left: 5px;
@@ -276,12 +276,13 @@ function handleScroll() {
         margin-right: 15px;
       }
       &.active {
-        background-color: #42b983;
-        color: #fff;
-        border-color: #42b983;
+        background-color: #f7cb4e;
+        color: #3d3520;
+        border-color: #f7cb4e;
+        font-weight: 600;
         &::before {
           content: "";
-          background: #fff;
+          background: #3d3520;
           display: inline-block;
           width: 8px;
           height: 8px;
@@ -294,22 +295,24 @@ function handleScroll() {
   }
   .contextmenu {
     margin: 0;
-    background: #fff;
+    background: #ffffff;
     z-index: 3000;
     position: absolute;
     list-style-type: none;
     padding: 5px 0;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 400;
-    color: #333;
-    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
+    color: #3d3520;
+    box-shadow: 0 8px 20px rgba(120, 90, 0, 0.14);
+    border: 1px solid #eadfbd;
     li {
       margin: 0;
       padding: 7px 16px;
       cursor: pointer;
       &:hover {
-        background: #eee;
+        background: rgba(247, 203, 78, 0.18);
+        color: #3d3520;
       }
     }
   }
@@ -334,8 +337,8 @@ function handleScroll() {
         vertical-align: -3px;
       }
       &:hover {
-        background-color: #b4bccc;
-        color: #fff;
+        background-color: rgba(247, 203, 78, 0.55);
+        color: #3d3520;
         width: 12px !important;
         height: 12px !important;
       }

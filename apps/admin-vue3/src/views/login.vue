@@ -131,19 +131,22 @@ loginForm.model = useAuthCode.getUserCookie(loginForm.model)
   justify-content: center;
   align-items: center;
   height: 100%;
-  background: #f0f2f5;
+  background: #f9f5dc;
 }
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
-  color: #707070;
+  color: #3d3520;
+  font-weight: 700;
 }
 
 .login-form {
-  border-radius: 6px;
+  border-radius: 8px;
   background: #ffffff;
   width: 400px;
   padding: 25px 25px 5px 25px;
+  box-shadow: 0 10px 30px rgba(120, 90, 0, 0.12);
+  border: 1px solid #eadfbd;
   .input-icon {
     height: 39px;
     width: 14px;
@@ -168,7 +171,7 @@ loginForm.model = useAuthCode.getUserCookie(loginForm.model)
   bottom: 0;
   width: 100%;
   text-align: center;
-  color: #909399;
+  color: #6f6652;
   font-family: Arial;
   font-size: 12px;
   letter-spacing: 1px;

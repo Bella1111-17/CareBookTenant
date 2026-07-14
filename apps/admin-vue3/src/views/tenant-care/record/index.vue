@@ -37,11 +37,11 @@
       <el-table-column label="ID" width="70" align="center">
         <template #default="{ $index }">{{ recordIndex($index) }}</template>
       </el-table-column>
-      <el-table-column label="设备号" width="150" prop="deviceNo" show-overflow-tooltip />
+      <el-table-column label="设备号" width="150" align="center" prop="deviceNo" show-overflow-tooltip />
       <el-table-column label="护工ID" width="120" align="center">
-        <template #default="{ row }">{{ row.tenantCaregiverId || '——' }}</template>
+        <template #default="{ row }">{{ row.tenantCaregiverId || '-' }}</template>
       </el-table-column>
-      <el-table-column label="文件名" min-width="220" prop="fileName" show-overflow-tooltip />
+      <el-table-column label="文件名" min-width="220" align="center" prop="fileName" show-overflow-tooltip />
       <el-table-column label="切片" width="90" align="center" prop="chunkIndex" />
       <el-table-column label="开始时间" width="170" align="center">
         <template #default="{ row }">{{ parseTime(row.startTime) }}</template>
@@ -72,7 +72,7 @@
     <el-dialog title="录音详情" v-model="detailOpen" width="760px" append-to-body>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="设备号">{{ detail.deviceNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="护工ID">{{ detail.tenantCaregiverId || '——' }}</el-descriptions-item>
+        <el-descriptions-item label="护工ID">{{ detail.tenantCaregiverId || '-' }}</el-descriptions-item>
         <el-descriptions-item label="文件名" :span="2">{{ detail.fileName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="隔离状态">{{ isolationLabel(detail.isolationStatus) }}</el-descriptions-item>
         <el-descriptions-item label="隔离原因">{{ detail.isolationReason || '-' }}</el-descriptions-item>

@@ -30,9 +30,9 @@
 
     <el-table v-loading="loading" :data="reportList">
       <el-table-column label="ID" width="70" align="center" prop="id" />
-      <el-table-column label="设备号" width="150" prop="deviceNo" show-overflow-tooltip />
+      <el-table-column label="设备号" width="150" align="center" prop="deviceNo" show-overflow-tooltip />
       <el-table-column label="护工ID" width="100" align="center">
-        <template #default="{ row }">{{ row.tenantCaregiverId || '——' }}</template>
+        <template #default="{ row }">{{ row.tenantCaregiverId || '-' }}</template>
       </el-table-column>
       <el-table-column label="护工名称" width="120" align="center" prop="caregiverName">
         <template #default="{ row }">{{ row.caregiverName || '-' }}</template>
@@ -52,7 +52,7 @@
           <el-tag :type="row.qualityStatus === 'NORMAL' ? 'success' : 'warning'">{{ row.qualityStatus || 'NORMAL' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="AI摘要" min-width="300" show-overflow-tooltip>
+      <el-table-column label="AI摘要" min-width="300" align="center" show-overflow-tooltip>
         <template #default="{ row }">{{ row.reportCard?.aiSummary || row.summaryText || '-' }}</template>
       </el-table-column>
       <el-table-column label="操作" width="170" align="center" fixed="right">
@@ -92,68 +92,82 @@
       </template>
     </el-dialog>
 
-    <el-dialog title="日报详情" v-model="detailOpen" width="860px" append-to-body>
-      <div class="detail-shell">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="设备号">{{ detail.deviceNo || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="护工ID">{{ detail.tenantCaregiverId || '——' }}</el-descriptions-item>
-          <el-descriptions-item label="护工名称">{{ detail.caregiverName || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="日报日期">{{ detail.reportDate || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="生成状态">{{ detail.generationStatus || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="录音时长">{{ formatMinute(detail.totalDurationSeconds) }}</el-descriptions-item>
-          <el-descriptions-item label="讲话时长">{{ formatMinute(detail.totalSpeechSeconds) }}</el-descriptions-item>
-        </el-descriptions>
-        <section class="detail-section">
-          <div class="section-title">AI 投喂时间线</div>
-          <div class="text-panel muted">{{ detail.asrPayload || '暂无内容' }}</div>
-        </section>
-        <section class="detail-section">
-          <div class="section-title">清洗后文本</div>
-          <div class="text-panel">{{ detail.fullTranscript || '暂无内容' }}</div>
-        </section>
+    <el-dialog title="日报详情" v-model="detailOpen" width="960px" append-to-body>
+      <div class="report-modal">
+        <div class="hero">
+          <h1 class="title">{{ detail.reportDate || '-' }} 日报详情</h1>
+          <div class="meta">设备 {{ detail.deviceNo || '-' }} · 护工ID {{ detail.tenantCaregiverId || '-' }} · 护工 {{ detail.caregiverName || '-' }}</div>
+          <div class="summary" v-if="detail.aiSummary || detail.summaryText">{{ detail.aiSummary || detail.summaryText }}</div>
+        </div>
+
+        <div class="grid">
+          <article class="card">
+            <h2>基本信息</h2>
+            <div class="info-list">
+              <div class="info-item"><span class="info-label">生成状态</span><span class="info-value">{{ detail.generationStatus || '-' }}</span></div>
+              <div class="info-item"><span class="info-label">录音时长</span><span class="info-value">{{ formatMinute(detail.totalDurationSeconds) }}</span></div>
+              <div class="info-item"><span class="info-label">讲话时长</span><span class="info-value">{{ formatMinute(detail.totalSpeechSeconds) }}</span></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid">
+          <div class="detail-text-grid">
+            <section class="card">
+              <h2>AI 投喂时间线</h2>
+              <div class="text-panel">{{ detail.asrPayload || '暂无内容' }}</div>
+            </section>
+            <section class="card">
+              <h2>清洗后文本</h2>
+              <div class="text-panel">{{ detail.fullTranscript || '暂无内容' }}</div>
+            </section>
+          </div>
+        </div>
       </div>
     </el-dialog>
 
-    <el-dialog title="质检 / 风险分析" v-model="analysisOpen" width="920px" append-to-body>
-      <div class="analysis-layout" v-if="analysis.reportCard">
-        <section class="analysis-hero">
-          <div class="analysis-hero__title">{{ analysis.reportDate }} 日报分析</div>
-          <div class="analysis-hero__meta">设备 {{ analysis.deviceNo || '-' }} · 护工ID {{ analysis.tenantCaregiverId || '——' }} · 护工 {{ analysis.caregiverName || '-' }}</div>
-          <div class="analysis-hero__summary">{{ analysis.reportCard.aiSummary || analysis.summaryText || '暂无 AI 摘要' }}</div>
-        </section>
-        <section class="analysis-grid">
-          <article class="panel">
-            <div class="panel-title">评分</div>
-            <div class="score-line">
-              <span class="score-value">{{ formatScore(analysis.reportCard.overallScore) }}</span>
-              <span class="score-unit">/10</span>
+    <el-dialog title="质检 / 风险分析" v-model="analysisOpen" width="960px" append-to-body>
+      <div class="report-modal analysis-modal" v-if="analysis.reportCard">
+        <div class="hero">
+          <h1 class="title">{{ analysis.reportDate }} 日报分析</h1>
+          <div class="meta">设备 {{ analysis.deviceNo || '-' }} · 护工ID {{ analysis.tenantCaregiverId || '-' }} · 护工 {{ analysis.caregiverName || '-' }}</div>
+          <div class="summary">{{ analysis.reportCard.aiSummary || analysis.summaryText || '暂无 AI 摘要' }}</div>
+        </div>
+
+        <div class="analysis-card-grid">
+          <article class="card">
+            <h2>评分</h2>
+            <div class="score-wrap">
+              <div class="score">{{ formatScore(analysis.reportCard.overallScore) }}</div>
+              <div class="outof">/10</div>
             </div>
-            <p class="panel-text">{{ analysis.reportCard.scoreComment || '暂无评分说明' }}</p>
+            <p class="score-desc">{{ analysis.reportCard.scoreComment || '暂无评分说明' }}</p>
           </article>
-          <article class="panel">
-            <div class="panel-title">任务完成</div>
-            <div v-if="analysis.reportCard.tasksCompleted?.length" class="tag-list">
-              <el-tag v-for="item in analysis.reportCard.tasksCompleted" :key="item">{{ item }}</el-tag>
+          <article class="card">
+            <h2>任务完成</h2>
+            <div v-if="analysis.reportCard.tasksCompleted?.length" class="task-list">
+              <span v-for="item in analysis.reportCard.tasksCompleted" :key="item" class="task">
+                <span class="check">✓</span>{{ item }}
+              </span>
             </div>
             <p v-else class="panel-text">暂无任务记录</p>
           </article>
-        </section>
-        <section class="analysis-grid">
-          <article class="panel risk-panel">
-            <div class="panel-title">风险提醒</div>
-            <ul v-if="analysis.reportCard.riskAlerts?.length" class="plain-list">
+
+          <article class="card risk">
+            <h2><span class="icon">⚠</span>风险提醒</h2>
+            <ul v-if="analysis.reportCard.riskAlerts?.length" class="list">
               <li v-for="item in analysis.reportCard.riskAlerts" :key="item">{{ item }}</li>
             </ul>
             <p v-else class="panel-text">暂无明显风险</p>
           </article>
-          <article class="panel">
-            <div class="panel-title">服务亮点</div>
-            <ul v-if="analysis.reportCard.highlights?.length" class="plain-list">
+          <article class="card service">
+            <h2><span class="icon">💙</span>服务亮点</h2>
+            <ul v-if="analysis.reportCard.highlights?.length" class="list">
               <li v-for="item in analysis.reportCard.highlights" :key="item">{{ item }}</li>
             </ul>
             <p v-else class="panel-text">暂无服务亮点</p>
           </article>
-        </section>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -341,106 +355,214 @@ getList()
   margin-bottom: 16px;
 }
 
-.detail-shell {
+.report-modal {
+  display: grid;
+  gap: 16px;
+}
+
+.hero {
+  margin: 0;
+  padding: 20px 22px 18px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(242, 236, 210, 0.88), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(43, 122, 179, 0.12);
+}
+
+.title {
+  margin: 0;
+  color: #2b7ab3;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.12;
+}
+
+.meta {
+  margin-top: 10px;
+  color: #647385;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.summary {
+  margin-top: 12px;
+  color: #324255;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.grid {
   display: grid;
   gap: 14px;
 }
 
-.section-title,
-.panel-title {
-  margin-bottom: 8px;
-  font-weight: 700;
-  color: #303133;
+.card {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(43, 122, 179, 0.14);
+  padding: 18px 20px 16px;
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  color: #2b7ab3;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.info-list {
+  display: grid;
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.info-label {
+  color: #647385;
+  min-width: 80px;
+}
+
+.info-value {
+  color: #21415b;
+  font-weight: 600;
 }
 
 .text-panel {
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
   white-space: pre-wrap;
   padding: 14px;
-  border-radius: 6px;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  line-height: 1.75;
-}
-
-.text-panel.muted {
+  border-radius: 10px;
   background: #f7f9fb;
-}
-
-.analysis-layout {
-  display: grid;
-  gap: 12px;
-}
-
-.analysis-hero,
-.panel {
-  padding: 16px;
-  border: 1px solid #ebeef5;
-  border-radius: 6px;
-  background: #fff;
-}
-
-.analysis-hero__title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #17324d;
-}
-
-.analysis-hero__meta {
-  margin-top: 6px;
-  color: #667085;
-}
-
-.analysis-hero__summary {
-  margin-top: 12px;
+  border: 1px solid rgba(43, 122, 179, 0.08);
   line-height: 1.8;
-  color: #303133;
+  font-size: 14px;
+  color: #324255;
 }
 
-.analysis-grid {
+.detail-text-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
-.score-line {
+.risk {
+  background: linear-gradient(180deg, rgba(242, 236, 210, 0.78), rgba(255, 255, 255, 0.92));
+}
+
+.service {
+  background: linear-gradient(180deg, rgba(177, 224, 240, 0.24), rgba(255, 255, 255, 0.92));
+}
+
+.score-wrap {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.score-value {
-  font-size: 34px;
-  line-height: 1;
-  font-weight: 700;
-  color: #1f6fb2;
+.score {
+  font-size: 52px;
+  line-height: 0.9;
+  font-weight: 900;
+  color: #2b7ab3;
 }
 
-.score-unit,
-.panel-text {
-  color: #667085;
+.outof {
+  font-size: 22px;
+  color: #6f7b86;
+  padding-bottom: 6px;
 }
 
-.tag-list {
+.score-desc {
+  color: #4d5c6a;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.task-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.plain-list {
-  margin: 0;
-  padding-left: 18px;
-  line-height: 1.8;
+.task {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(177, 224, 240, 0.55), rgba(255, 255, 255, 0.82));
+  border: 1px solid rgba(43, 122, 179, 0.12);
+  color: #1f6f9f;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.risk-panel {
-  border-color: #f6d6ad;
-  background: #fffaf3;
+.check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: #2b7ab3;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  color: #394754;
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.list li + li {
+  margin-top: 4px;
+}
+
+.panel-text {
+  color: #647385;
+  font-size: 14px;
+  margin: 0;
+}
+
+.analysis-modal {
+  grid-template-columns: 1fr;
+}
+
+.analysis-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analysis-card-grid .card {
+  min-height: 0;
 }
 
 @media (max-width: 960px) {
-  .analysis-grid {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-text-grid,
+  .analysis-card-grid {
     grid-template-columns: 1fr;
   }
 }

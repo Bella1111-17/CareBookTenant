@@ -62,9 +62,10 @@ getBreadcrumb();
   font-size: 14px;
   line-height: 50px;
   margin-left: 8px;
+  color: #3d3520;
 
   .no-redirect {
-    color: #97a8be;
+    color: #5f553f;
     cursor: text;
   }
 }

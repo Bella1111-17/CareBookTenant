@@ -24,8 +24,8 @@
     left: 0;
     z-index: 1001;
     overflow: hidden;
-    -webkit-box-shadow: 2px 0 6px rgba(0,21,41,.35);
-    box-shadow: 2px 0 6px rgba(0,21,41,.35);
+    -webkit-box-shadow: 2px 0 10px rgba(120, 90, 0, 0.12);
+    box-shadow: 2px 0 10px rgba(120, 90, 0, 0.12);
 
     // reset element-ui css
     .horizontal-collapse-transition {
@@ -68,6 +68,7 @@
       border: none;
       height: 100%;
       width: 100% !important;
+      background-color: $base-menu-background !important;
     }
 
     .el-menu-item, .menu-title {
@@ -84,12 +85,13 @@
     .sub-menu-title-noDropdown,
     .el-sub-menu__title {
       &:hover {
-        background-color: rgba(0, 0, 0, 0.06) !important;
+        background-color: rgba(255, 255, 255, 0.24) !important;
       }
     }
 
     & .theme-dark .is-active > .el-sub-menu__title {
       color: $base-menu-color-active !important;
+      background-color: rgba(255, 255, 255, 0.34) !important;
     }
 
     & .nest-menu .el-sub-menu>.el-sub-menu__title,
@@ -97,7 +99,7 @@
       min-width: $base-sidebar-width !important;
 
       &:hover {
-        background-color: rgba(0, 0, 0, 0.06) !important;
+        background-color: rgba(255, 255, 255, 0.24) !important;
       }
     }
 
@@ -106,7 +108,7 @@
       background-color: $base-sub-menu-background !important;
 
       &:hover {
-        background-color: $base-sub-menu-hover !important;
+        background-color: rgba(255, 255, 255, 0.28) !important;
       }
     }
   }
@@ -212,8 +214,7 @@
   .nest-menu .el-sub-menu>.el-sub-menu__title,
   .el-menu-item {
     &:hover {
-      // you can use $sub-menuHover
-      background-color: rgba(0, 0, 0, 0.06) !important;
+      background-color: rgba(255, 255, 255, 0.24) !important;
     }
   }
 
@@ -223,7 +224,7 @@
     overflow-y: auto;
 
     &::-webkit-scrollbar-track-piece {
-      background: #d3dce6;
+      background: #fbf3d6;
     }
 
     &::-webkit-scrollbar {
@@ -231,7 +232,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #99a9bf;
+      background: #e2c86a;
       border-radius: 20px;
     }
   }

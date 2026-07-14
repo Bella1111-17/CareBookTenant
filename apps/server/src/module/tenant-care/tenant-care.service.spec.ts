@@ -1,4 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
+import { TenantBadgeBindingEntity } from './entities/tenant-badge-binding.entity';
 import { TenantCareService } from './tenant-care.service';
 
 function createQueryBuilderMock() {
@@ -21,6 +22,7 @@ function createQueryBuilderMock() {
     getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
     getMany: jest.fn().mockResolvedValue([]),
     getRawMany: jest.fn().mockResolvedValue([]),
+    getRawOne: jest.fn().mockResolvedValue({ count: 0 }),
     getOne: jest.fn().mockResolvedValue(null),
     update: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
@@ -42,6 +44,7 @@ describe('TenantCareService tenant isolation', () => {
   const bindingRepo = {
     createQueryBuilder: jest.fn(),
     findOne: jest.fn(),
+    update: jest.fn(),
     manager: { transaction: jest.fn() },
   };
   const reportRepo = {
@@ -67,9 +70,23 @@ describe('TenantCareService tenant isolation', () => {
   const eventRepo = {
     createQueryBuilder: jest.fn(),
   };
+  const tenantRepo = {
+    createQueryBuilder: jest.fn(),
+    findOne: jest.fn(),
+  };
+  const deviceTenantBindingRepo = {
+    createQueryBuilder: jest.fn(),
+    findOne: jest.fn(),
+    manager: { transaction: jest.fn() },
+  };
+  const userRepo = {
+    findOne: jest.fn(),
+  };
   const tenantContextService = {
     isPlatformUser: jest.fn(),
     getTenantId: jest.fn(),
+    getUserScope: jest.fn(),
+    getUserId: jest.fn(),
   };
   const http = {};
   const config = {
@@ -85,6 +102,7 @@ describe('TenantCareService tenant isolation', () => {
     caregiverRepo.save.mockImplementation(async (value) => value);
     caregiverRepo.update.mockResolvedValue({ affected: 1 });
     bindingRepo.findOne.mockResolvedValue(null);
+    bindingRepo.update.mockResolvedValue({ affected: 1 });
     bindingRepo.manager.transaction.mockResolvedValue(undefined);
     deviceRepo.findOne.mockResolvedValue(null);
     deviceRepo.create.mockImplementation((value) => value);
@@ -96,6 +114,15 @@ describe('TenantCareService tenant isolation', () => {
     reportRepo.save.mockImplementation(async (value) => ({ id: 101, ...value }));
     reportRepo.update.mockResolvedValue({ affected: 1 });
     audioRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
+    gpsRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
+    eventRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
+    tenantRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
+    tenantRepo.findOne.mockResolvedValue(null);
+    deviceTenantBindingRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
+    deviceTenantBindingRepo.findOne.mockResolvedValue(null);
+    deviceTenantBindingRepo.manager.transaction.mockResolvedValue(undefined);
+    userRepo.findOne.mockResolvedValue(null);
+    tenantContextService.getUserId.mockReturnValue(null);
     config.get.mockReturnValue('');
     service = new TenantCareService(
       caregiverRepo as any,
@@ -106,6 +133,9 @@ describe('TenantCareService tenant isolation', () => {
       audioRepo as any,
       gpsRepo as any,
       eventRepo as any,
+      tenantRepo as any,
+      deviceTenantBindingRepo as any,
+      userRepo as any,
       tenantContextService as any,
       http as any,
       config as any,
@@ -217,20 +247,21 @@ describe('TenantCareService tenant isolation', () => {
   });
 
   it('uses the active binding tenant when platform unbinds a device with stale device tenant', async () => {
-    const qb = createQueryBuilderMock();
-    bindingRepo.createQueryBuilder.mockReturnValue(qb);
     tenantContextService.isPlatformUser.mockReturnValue(true);
     tenantContextService.getTenantId.mockReturnValue(null);
     deviceRepo.findOne.mockResolvedValue({ id: 1, deviceNo: 'BADGE-001', tenantId: 'platform-self' });
     bindingRepo.findOne.mockResolvedValue({ id: 9, deviceNo: 'BADGE-001', tenantId: 'tenant-b', unbindAt: null });
 
-    const result = await service.unbindBadge({ deviceNo: 'BADGE-001' } as any);
+    const result = await service.unbindBadge({ deviceNo: 'BADGE-001', unbindReason: 'replace device' } as any);
 
     expect(result.code).toBe(200);
-    expect(qb.where).toHaveBeenCalledWith('tenantId = :tenantId AND deviceNo = :deviceNo AND unbindAt IS NULL', {
-      tenantId: 'tenant-b',
-      deviceNo: 'BADGE-001',
-    });
+    expect(bindingRepo.update).toHaveBeenCalledWith(
+      { id: 9 },
+      expect.objectContaining({
+        unbindReason: 'replace device',
+        bindStatus: 'UNBOUND',
+      }),
+    );
   });
 
   it('creates tenant device under the current tenant for tenant users', async () => {
@@ -248,6 +279,73 @@ describe('TenantCareService tenant isolation', () => {
         deviceNo: 'BADGE-TENANT-A',
       }),
     );
+  });
+
+  it('summarizes platform devices across all tenants when tenantId is not requested', async () => {
+    const qb = createQueryBuilderMock();
+    qb.getCount.mockResolvedValueOnce(5).mockResolvedValueOnce(3).mockResolvedValueOnce(2);
+    qb.getRawOne.mockResolvedValueOnce({ count: '2' });
+    deviceRepo.createQueryBuilder.mockReturnValue(qb);
+    tenantContextService.isPlatformUser.mockReturnValue(true);
+    tenantContextService.getTenantId.mockReturnValue(null);
+
+    const result = await service.deviceSummary({ pageNum: 1, pageSize: 10 } as any);
+
+    expect(result.data).toEqual({
+      totalDevices: 5,
+      assignedDevices: 3,
+      idleDevices: 2,
+      boundTenants: 2,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith("d.tenantId IS NOT NULL AND d.tenantId <> ''");
+    expect(qb.andWhere).toHaveBeenCalledWith("(d.tenantId IS NULL OR d.tenantId = '')");
+    expect(qb.andWhere).not.toHaveBeenCalledWith('d.tenantId = :tenantScopeTenantId', expect.anything());
+  });
+
+  it('summarizes platform devices within a requested tenant', async () => {
+    const qb = createQueryBuilderMock();
+    qb.getCount.mockResolvedValueOnce(4).mockResolvedValueOnce(4).mockResolvedValueOnce(0);
+    qb.getRawOne.mockResolvedValueOnce({ count: '1' });
+    deviceRepo.createQueryBuilder.mockReturnValue(qb);
+    tenantContextService.isPlatformUser.mockReturnValue(true);
+    tenantContextService.getTenantId.mockReturnValue(null);
+
+    const result = await service.deviceSummary({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
+
+    expect(result.data).toEqual({
+      totalDevices: 4,
+      assignedDevices: 4,
+      idleDevices: 0,
+      boundTenants: 1,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('d.tenantId = :tenantScopeTenantId', {
+      tenantScopeTenantId: 'tenant-b',
+    });
+  });
+
+  it('summarizes tenant devices using active caregiver bindings and tenant scope', async () => {
+    const qb = createQueryBuilderMock();
+    qb.getCount.mockResolvedValueOnce(4).mockResolvedValueOnce(2);
+    qb.getRawOne.mockResolvedValueOnce({ count: '2' });
+    deviceRepo.createQueryBuilder.mockReturnValue(qb);
+    tenantContextService.isPlatformUser.mockReturnValue(false);
+    tenantContextService.getTenantId.mockReturnValue('tenant-a');
+
+    const result = await service.deviceSummary({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
+
+    expect(result.data).toEqual({
+      totalDevices: 4,
+      boundDevices: 2,
+      idleDevices: 2,
+      boundCaregivers: 2,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('d.tenantId = :tenantScopeTenantId', {
+      tenantScopeTenantId: 'tenant-a',
+    });
+    expect(qb.andWhere).not.toHaveBeenCalledWith('d.tenantId = :tenantScopeTenantId', {
+      tenantScopeTenantId: 'tenant-b',
+    });
+    expect(qb.innerJoin).toHaveBeenCalledWith(TenantBadgeBindingEntity, 'b', expect.stringContaining('b.unbindAt IS NULL'), expect.any(Object));
   });
 
   it('filters GPS logs by device tenant ownership, not only log tenant_id', async () => {

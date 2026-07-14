@@ -1,42 +1,39 @@
-// base color
-$blue: #324157;
-$light-blue: #3A71A8;
+// CareBook warm brand theme
+$brand-primary: #f7cb4e;
+$brand-primary-hover: #f4bd28;
+$brand-primary-active: #dca713;
+$brand-page-bg: #f9f5dc;
+$brand-surface: #fffdf7;
+$brand-text: #3d3520;
+$brand-text-regular: #5f553f;
+$brand-text-secondary: #6f6652;
+$brand-border: #eadfbd;
+
+// Button palettes kept for btn.scss.
+$blue: #3A71A8;
+$light-blue: #5A9BD5;
 $red: #C03639;
 $pink: #E65D6E;
-$green: #30B08F;
+$green: #67C23A;
 $tiffany: #4AB7BD;
-$yellow: #FEC171;
-$panGreen: #30B08F;
+$yellow: $brand-primary;
+$panGreen: #67C23A;
 
-// 默认菜单主题风格
-$base-menu-color: #bfcbd9;
-$base-menu-color-active: #f4f4f5;
-$base-menu-background: #304156;
-$base-logo-title-color: #ffffff;
+// Sidebar colors.
+$base-menu-color: $brand-text;
+$base-menu-color-active: $brand-text;
+$base-menu-background: $brand-primary;
+$base-logo-title-color: $brand-text;
 
-$base-menu-light-color: rgba(0, 0, 0, 0.7);
+$base-menu-light-color: rgba(0, 0, 0, 0.75);
 $base-menu-light-background: #ffffff;
-$base-logo-light-title-color: #001529;
+$base-logo-light-title-color: $brand-text;
 
-$base-sub-menu-background: #1f2d3d;
-$base-sub-menu-hover: #001528;
+$base-sub-menu-background: #f5d469;
+$base-sub-menu-hover: rgba(255, 255, 255, 0.32);
 
-// 自定义暗色菜单风格
-/**
-$base-menu-color:hsla(0,0%,100%,.65);
-$base-menu-color-active:#fff;
-$base-menu-background:#001529;
-$base-logo-title-color: #ffffff;
-
-$base-menu-light-color:rgba(0,0,0,.70);
-$base-menu-light-background:#ffffff;
-$base-logo-light-title-color: #001529;
-
-$base-sub-menu-background:#000c17;
-$base-sub-menu-hover:#001528;
-*/
-
-$--color-primary: #409EFF;
+// Element Plus primary color.
+$--color-primary: $brand-primary;
 $--color-success: #67C23A;
 $--color-warning: #E6A23C;
 $--color-danger: #F56C6C;
@@ -62,4 +59,21 @@ $base-sidebar-width: 200px;
   dangerColor: $--color-danger;
   infoColor: $--color-info;
   warningColor: $--color-warning;
+  brandPrimary: $brand-primary;
+  brandPrimaryHover: $brand-primary-hover;
+  brandPrimaryActive: $brand-primary-active;
+  brandPageBg: $brand-page-bg;
+  brandSurface: $brand-surface;
+  brandText: $brand-text;
+  brandTextRegular: $brand-text-regular;
+  brandTextSecondary: $brand-text-secondary;
+  brandBorder: $brand-border;
+  blue: $blue;
+  lightBlue: $light-blue;
+  red: $red;
+  pink: $pink;
+  green: $green;
+  tiffany: $tiffany;
+  yellow: $yellow;
+  panGreen: $panGreen;
 }

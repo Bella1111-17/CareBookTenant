@@ -96,8 +96,8 @@ function setLayout() {
   height: 50px;
   overflow: hidden;
   position: relative;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  background: #f7cb4e;
+  box-shadow: 0 1px 6px rgba(120, 90, 0, 0.12);
 
   .hamburger-container {
     line-height: 46px;
@@ -106,9 +106,10 @@ function setLayout() {
     cursor: pointer;
     transition: background 0.3s;
     -webkit-tap-highlight-color: transparent;
+    color: #3d3520;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.025);
+      background: rgba(255, 255, 255, 0.24);
     }
   }
 
@@ -141,7 +142,7 @@ function setLayout() {
       padding: 0 8px;
       height: 100%;
       font-size: 18px;
-      color: #5a5e66;
+      color: #3d3520;
       vertical-align: text-bottom;
 
       &.hover-effect {
@@ -149,7 +150,7 @@ function setLayout() {
         transition: background 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, 0.025);
+          background: rgba(255, 255, 255, 0.24);
         }
       }
     }
@@ -165,7 +166,7 @@ function setLayout() {
           cursor: pointer;
           width: 40px;
           height: 40px;
-          border-radius: 10px;
+          border-radius: 50%;
         }
 
         i {
@@ -174,6 +175,7 @@ function setLayout() {
           right: -20px;
           top: 25px;
           font-size: 12px;
+          color: #3d3520;
         }
       }
     }

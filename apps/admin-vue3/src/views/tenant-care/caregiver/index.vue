@@ -38,18 +38,18 @@
 
     <el-table v-loading="loading" :data="caregiverList">
       <el-table-column label="护工ID" width="90" align="center" prop="id" />
-      <el-table-column label="姓名" min-width="140" prop="realName" />
-      <el-table-column label="手机号" width="150" prop="phone" />
-      <el-table-column label="护理单元" min-width="160">
+      <el-table-column label="姓名" min-width="140" align="center" prop="realName" />
+      <el-table-column label="手机号" width="150" align="center" prop="phone" />
+      <el-table-column label="护理单元" min-width="160" align="center">
         <template #default="{ row }">{{ row.orgUnitName || '-' }}</template>
       </el-table-column>
-      <el-table-column label="技能标签" min-width="220">
+      <el-table-column label="技能标签" min-width="220" align="center">
         <template #default="{ row }">
           <el-tag v-for="tag in row.skillTags || []" :key="tag" class="tag-item" size="small">{{ tag }}</el-tag>
           <span v-if="!row.skillTags?.length" class="empty-text">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="资质" min-width="180" prop="qualification" show-overflow-tooltip />
+      <el-table-column label="资质" min-width="180" align="center" prop="qualification" show-overflow-tooltip />
       <el-table-column label="状态" width="100" align="center">
         <template #default="{ row }">
           <el-tag :type="row.status === '0' ? 'success' : 'danger'">{{ row.status === '0' ? '启用' : '停用' }}</el-tag>
@@ -132,8 +132,8 @@
         </el-form-item>
       </el-form>
       <el-table :data="orgUnitOptions" size="small" class="org-unit-table">
-        <el-table-column label="单元" prop="unitName" />
-        <el-table-column label="排序" width="80" prop="sortOrder" />
+        <el-table-column label="单元" align="center" prop="unitName" />
+        <el-table-column label="排序" width="80" align="center" prop="sortOrder" />
         <el-table-column label="操作" width="90" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="editOrgUnit(row)">编辑</el-button>

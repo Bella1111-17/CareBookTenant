@@ -40,6 +40,30 @@ export function listTenantDevices(query) {
   return request({ url: '/tenant-care/device/list', method: 'get', params: query })
 }
 
+export function tenantDeviceSummary(query) {
+  return request({ url: '/tenant-care/device/summary', method: 'get', params: query })
+}
+
+export function tenantDeviceSummaryDetail(query) {
+  return request({ url: '/tenant-care/device/summary/detail', method: 'get', params: query })
+}
+
+export function distributeTenantDevice(data) {
+  return request({ url: '/tenant-care/device/distribute', method: 'post', data })
+}
+
+export function reclaimTenantDevice(data) {
+  return request({ url: '/tenant-care/device/reclaim', method: 'post', data })
+}
+
+export function listDeviceTenantBindings(query) {
+  return request({ url: '/tenant-care/device/tenant-binding/list', method: 'get', params: query })
+}
+
+export function tenantDeviceFlow(query) {
+  return request({ url: '/tenant-care/device/flow', method: 'get', params: query })
+}
+
 export function deleteTenantDevice(id) {
   return request({ url: '/tenant-care/device/' + id, method: 'delete' })
 }

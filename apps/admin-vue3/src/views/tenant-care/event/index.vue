@@ -41,19 +41,19 @@
     </el-form>
 
     <el-table v-loading="loading" :data="eventList">
-      <el-table-column label="设备号" align="center" prop="deviceNo" width="160" show-overflow-tooltip />
-      <el-table-column label="护工" align="center" prop="caregiverName" width="140" show-overflow-tooltip>
+      <el-table-column label="设备号" align="center" prop="deviceNo" width="180" show-overflow-tooltip />
+      <el-table-column label="护工" align="center" prop="caregiverName" width="150" show-overflow-tooltip>
         <template #default="{ row }">{{ row.caregiverName || '-' }}</template>
       </el-table-column>
-      <el-table-column label="事件类型" align="center" prop="eventType" width="110">
+      <el-table-column label="事件类型" align="center" prop="eventType" width="120">
         <template #default="{ row }">
           <el-tag :type="tagType(row.eventType)" size="small">{{ label(row.eventType) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="事件名称" align="center" prop="eventName" width="130" show-overflow-tooltip />
-      <el-table-column label="状态" align="center" prop="eventStatus" width="110" />
-      <el-table-column label="详情" align="center" prop="detail" min-width="240" show-overflow-tooltip />
-      <el-table-column label="时间" align="center" prop="createdAt" width="170">
+      <el-table-column label="事件名称" align="center" prop="eventName" width="160" show-overflow-tooltip />
+      <el-table-column label="状态" align="center" prop="eventStatus" width="120" />
+      <el-table-column label="详情" align="center" prop="detail" min-width="280" show-overflow-tooltip />
+      <el-table-column label="时间" align="center" prop="createdAt" width="180">
         <template #default="{ row }">{{ parseTime(row.createdAt) }}</template>
       </el-table-column>
     </el-table>

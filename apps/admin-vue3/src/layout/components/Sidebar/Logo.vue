@@ -47,9 +47,10 @@ const title = computed(() => (userStore.userScope === 'tenant' ? '智能护理�
   width: 100%;
   height: 50px;
   line-height: 50px;
-  background: #2b2f3a;
+  background: #f7cb4e;
   text-align: center;
   overflow: hidden;
+  border-bottom: 1px solid rgba(61, 53, 32, 0.08);
 
   & .sidebar-logo-link {
     height: 100%;
@@ -65,8 +66,8 @@ const title = computed(() => (userStore.userScope === 'tenant' ? '智能护理�
     & .sidebar-title {
       display: inline-block;
       margin: 0;
-      color: #fff;
-      font-weight: 600;
+      color: #3d3520;
+      font-weight: 700;
       line-height: 50px;
       font-size: 12px;
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;

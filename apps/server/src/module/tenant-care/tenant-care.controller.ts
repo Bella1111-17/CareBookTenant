@@ -5,13 +5,19 @@ import {
   CreateTenantCaregiverDto,
   CreateTenantDeviceDto,
   CreateTenantOrgUnitDto,
+  DeviceFlowDto,
+  DistributeTenantDeviceDto,
   GenerateTenantDailyReportDto,
+  ListDeviceTenantBindingDto,
   ListTenantBindingDto,
   ListTenantCaregiverDto,
   ListTenantDailyReportDto,
+  ListTenantDeviceSummaryDetailDto,
+  ListTenantDeviceSummaryDto,
   ListTenantDeviceEventDto,
   ListTenantGpsDto,
   ListTenantRecordDto,
+  ReclaimTenantDeviceDto,
   TenantScopedPagingDto,
   UnbindTenantBadgeDto,
   UpdateTenantCaregiverDto,
@@ -89,6 +95,44 @@ export class TenantCareController {
   @Get('/device/list')
   listDevices(@Query() query: TenantScopedPagingDto & { deviceNo?: string; bindingStatus?: string }) {
     return this.tenantCareService.listDevices(query);
+  }
+
+  @ApiOperation({ summary: '租户设备统计' })
+  @Get('/device/summary')
+  deviceSummary(@Query() query: ListTenantDeviceSummaryDto) {
+    return this.tenantCareService.deviceSummary(query);
+  }
+
+  @ApiOperation({ summary: '租户设备统计明细' })
+  @Get('/device/summary/detail')
+  deviceSummaryDetail(@Query() query: ListTenantDeviceSummaryDetailDto) {
+    return this.tenantCareService.deviceSummaryDetail(query);
+  }
+
+  @ApiOperation({ summary: '平台分发设备给租户' })
+  @Post('/device/distribute')
+  @HttpCode(200)
+  distributeDevice(@Body() dto: DistributeTenantDeviceDto) {
+    return this.tenantCareService.distributeDevice(dto);
+  }
+
+  @ApiOperation({ summary: '平台收回租户设备' })
+  @Post('/device/reclaim')
+  @HttpCode(200)
+  reclaimDevice(@Body() dto: ReclaimTenantDeviceDto) {
+    return this.tenantCareService.reclaimDevice(dto);
+  }
+
+  @ApiOperation({ summary: '平台设备分发历史' })
+  @Get('/device/tenant-binding/list')
+  listDeviceTenantBindings(@Query() query: ListDeviceTenantBindingDto) {
+    return this.tenantCareService.listDeviceTenantBindings(query);
+  }
+
+  @ApiOperation({ summary: '设备流转时间线' })
+  @Get('/device/flow')
+  deviceFlow(@Query() query: DeviceFlowDto) {
+    return this.tenantCareService.deviceFlow(query);
   }
 
   @ApiOperation({ summary: '删除租户设备主档' })
