@@ -12,6 +12,7 @@ SERVER_LOG="/www/wwwlogs/admintenant.care.zbcare.cn"
 NODE_BIN="/www/server/nodejs/v24.17.0/bin"
 REMOTE_TMP="/tmp/deploy_server.tar.gz"
 REMOTE_ENV_TMP="/tmp/deploy_server.env"
+DEPLOY_ENV_FILE="${DEPLOY_ENV_FILE:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR_PARENT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -46,23 +47,32 @@ echo "Package ready: $(ls -lh "$PACK_NAME" | awk '{print $5}')"
 echo ""
 echo "3. Checking certificates..."
 CERT_DIR="/etc/carebook/wechat"
-ssh "${SERVER_USER}@${SERVER_IP}" "mkdir -p '${CERT_DIR}' && ls apiclient_key.pem >/dev/null 2>&1 || echo 'need_upload'" | grep -q "need_upload" && {
-    scp "${SCRIPT_DIR_PARENT}/apps/server/secrets/wechat/apiclient_key.pem" \
-        "${SCRIPT_DIR_PARENT}/apps/server/secrets/wechat/apiclient_cert.pem" \
-        "${SCRIPT_DIR_PARENT}/apps/server/secrets/wechat/pub_key.pem" \
-        "${SERVER_USER}@${SERVER_IP}:${CERT_DIR}/"
-    ssh "${SERVER_USER}@${SERVER_IP}" "chmod 400 '${CERT_DIR}'/apiclient_key.pem '${CERT_DIR}'/apiclient_cert.pem '${CERT_DIR}'/pub_key.pem"
-    echo "   Certificates uploaded with chmod 400"
-} || echo "   Certificates already exist, skipping"
+if ssh "${SERVER_USER}@${SERVER_IP}" "mkdir -p '${CERT_DIR}' && test -f '${CERT_DIR}/apiclient_key.pem'"; then
+    echo "   Certificates already exist, skipping"
+else
+    CERT_SOURCE="${SCRIPT_DIR_PARENT}/apps/server/secrets/wechat"
+    if [ -f "${CERT_SOURCE}/apiclient_key.pem" ] && [ -f "${CERT_SOURCE}/apiclient_cert.pem" ] && [ -f "${CERT_SOURCE}/pub_key.pem" ]; then
+        scp "${CERT_SOURCE}/apiclient_key.pem" \
+            "${CERT_SOURCE}/apiclient_cert.pem" \
+            "${CERT_SOURCE}/pub_key.pem" \
+            "${SERVER_USER}@${SERVER_IP}:${CERT_DIR}/"
+        ssh "${SERVER_USER}@${SERVER_IP}" "chmod 400 '${CERT_DIR}'/apiclient_key.pem '${CERT_DIR}'/apiclient_cert.pem '${CERT_DIR}'/pub_key.pem"
+        echo "   Certificates uploaded with chmod 400"
+    else
+        echo "   Certificates not found locally; keep remote files in ${CERT_DIR} if WeChat Pay is enabled"
+    fi
+fi
 
 echo ""
 echo "4. Uploading and deploying code..."
 
 scp "$PACK_NAME" "${SERVER_USER}@${SERVER_IP}:${REMOTE_TMP}"
-if [ -f "${SCRIPT_DIR_PARENT}/.env" ]; then
-    scp "${SCRIPT_DIR_PARENT}/.env" "${SERVER_USER}@${SERVER_IP}:${REMOTE_ENV_TMP}"
+if [ -n "${DEPLOY_ENV_FILE}" ] && [ -f "${DEPLOY_ENV_FILE}" ]; then
+    scp "${DEPLOY_ENV_FILE}" "${SERVER_USER}@${SERVER_IP}:${REMOTE_ENV_TMP}"
+elif [ -f "${SCRIPT_DIR_PARENT}/.env.production" ]; then
+    scp "${SCRIPT_DIR_PARENT}/.env.production" "${SERVER_USER}@${SERVER_IP}:${REMOTE_ENV_TMP}"
 else
-    echo "Root .env not found; remote environment variables must already be configured"
+    echo "No production env file uploaded; remote ${SERVER_PATH}/.env must already be configured"
 fi
 
 ssh "${SERVER_USER}@${SERVER_IP}" bash -s <<'REMOTE_EOF'

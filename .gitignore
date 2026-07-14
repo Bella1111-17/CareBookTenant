@@ -9,6 +9,8 @@ Thumbs.db
 .cache
 .env
 .env.local
+.env.production
+.env.*.local
 .envrc
 .direnv
 apps/*/node_modules

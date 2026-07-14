@@ -21,11 +21,11 @@ oss:
 
 db:
   postgres:
-    host: '101.133.170.55'
-    username: 'tenant_admin'
+    host: '${TOB_POSTGRES_HOST:-101.133.170.55}'
+    username: '${TOB_POSTGRES_USER:-tenant_admin}'
     password: '${TOB_POSTGRES_PASSWORD}'
-    database: 'carebook_tenant'
-    port: 5432
+    database: '${TOB_POSTGRES_DATABASE:-carebook_tenant}'
+    port: ${TOB_POSTGRES_PORT:-5432}
     logger: 'file'
     logging: false
     dropSchema: false
