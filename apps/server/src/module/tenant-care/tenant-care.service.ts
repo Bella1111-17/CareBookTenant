@@ -142,9 +142,9 @@ export class TenantCareService {
     return qb;
   }
 
-  private applyDeviceLogTenantScope(qb: any, logAlias: string, requestedTenantId?: string | null) {
+  private applyDeviceLogTenantScope(qb: any, logAlias: string, requestedTenantId?: string | null, forceRequestedTenantId = false) {
     const requested = String(requestedTenantId || '').trim();
-    const tenantId = this.tenantContextService.isPlatformUser() ? requested : this.tenantContextService.getTenantId();
+    const tenantId = forceRequestedTenantId ? requested : this.tenantContextService.isPlatformUser() ? requested : this.tenantContextService.getTenantId();
 
     if (tenantId) {
       qb.andWhere(
@@ -871,7 +871,7 @@ export class TenantCareService {
     return binding?.tenantCaregiverId || null;
   }
 
-  private async fetchChunks(tenantId: string | null, deviceNo: string, dateStr: string, options: { fileName?: string; allowUnboundAnalysis?: boolean } = {}) {
+  private async fetchChunks(tenantId: string | null, deviceNo: string, dateStr: string, options: { fileName?: string; allowUnboundAnalysis?: boolean; skipTenantAccess?: boolean } = {}) {
     const dayStart = dayjs(dateStr).startOf('day').toDate();
     const dayEnd = dayjs(dateStr).endOf('day').toDate();
     const qb = this.audioRepo
@@ -890,7 +890,7 @@ export class TenantCareService {
       return qb.orderBy('a.startTime', 'ASC').getMany();
     }
 
-    this.applyDeviceLogTenantScope(qb, 'a', tenantId);
+    this.applyDeviceLogTenantScope(qb, 'a', tenantId, options.skipTenantAccess);
     return qb.andWhere('a.isolationStatus = :isolationStatus', { isolationStatus: 'NORMAL' }).orderBy('a.startTime', 'ASC').getMany();
   }
 
@@ -1123,8 +1123,62 @@ export class TenantCareService {
     }
   }
 
-  private async generateOne(tenantId: string | null, deviceNo: string, dateStr: string, options: { fileName?: string; allowUnboundAnalysis?: boolean } = {}) {
-    if (tenantId) this.ensureTenantAccess(tenantId);
+  async generateScheduledDailyReports(dateStr = dayjs().format('YYYY-MM-DD')) {
+    const rows = await this.deviceRepo
+      .createQueryBuilder('d')
+      .innerJoin(
+        TenantBadgeBindingEntity,
+        'b',
+        'b.tenantId = d.tenantId AND b.deviceNo = d.deviceNo AND b.unbindAt IS NULL AND b.delFlag = :bindingDelFlag',
+        { bindingDelFlag: '0' },
+      )
+      .select(['d.tenantId AS tenantId', 'd.deviceNo AS deviceNo'])
+      .where('d.delFlag = :delFlag', { delFlag: '0' })
+      .andWhere("d.tenantId IS NOT NULL AND d.tenantId <> ''")
+      .groupBy('d.tenantId')
+      .addGroupBy('d.deviceNo')
+      .orderBy('d.tenantId', 'ASC')
+      .addOrderBy('d.deviceNo', 'ASC')
+      .getRawMany();
+
+    const summary = {
+      dateStr,
+      totalDevices: rows.length,
+      successCount: 0,
+      skippedCount: 0,
+      failCount: 0,
+      failures: [] as Array<{ tenantId: string; deviceNo: string; reason: string }>,
+    };
+
+    this.logger.log(`[tenant-care] 定时生成租户AI日报开始: date=${dateStr}, devices=${rows.length}`);
+    for (const row of rows) {
+      const tenantId = String(row.tenantId ?? row.tenantid ?? '').trim();
+      const deviceNo = this.normalizeDeviceNo(row.deviceNo ?? row.deviceno ?? '');
+      if (!tenantId || !deviceNo) {
+        summary.skippedCount += 1;
+        continue;
+      }
+
+      try {
+        await this.generateOne(tenantId, deviceNo, dateStr, { skipTenantAccess: true });
+        summary.successCount += 1;
+      } catch (err) {
+        const reason = err?.message || '租户AI日报生成失败';
+        if (reason.includes('没有可用转写切片')) {
+          summary.skippedCount += 1;
+          continue;
+        }
+        summary.failCount += 1;
+        summary.failures.push({ tenantId, deviceNo, reason });
+        this.logger.warn(`[tenant-care] 定时生成租户AI日报失败: tenant=${tenantId}, device=${deviceNo}, reason=${reason}`);
+      }
+    }
+    this.logger.log(`[tenant-care] 定时生成租户AI日报完成: ${JSON.stringify(summary)}`);
+    return summary;
+  }
+
+  private async generateOne(tenantId: string | null, deviceNo: string, dateStr: string, options: { fileName?: string; allowUnboundAnalysis?: boolean; skipTenantAccess?: boolean } = {}) {
+    if (tenantId && !options.skipTenantAccess) this.ensureTenantAccess(tenantId);
     const chunks = await this.fetchChunks(tenantId, deviceNo, dateStr, options);
     if (!chunks.length) throw new Error(`设备 ${deviceNo} 在 ${dateStr} 没有可用转写切片`);
     if (chunks.some((chunk) => chunk.asrStatus === 'RUNNING')) throw new Error('仍有切片转写中，请稍后重试');

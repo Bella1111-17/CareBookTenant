@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Task, TaskRegistry } from 'src/common/decorators/task.decorator';
 import { JobLogService } from './job-log.service';
+import { TenantCareService } from 'src/module/tenant-care/tenant-care.service';
 
 @Injectable()
 export class TaskService implements OnModuleInit {
@@ -13,6 +14,7 @@ export class TaskService implements OnModuleInit {
   constructor(
     private moduleRef: ModuleRef,
     private jobLogService: JobLogService,
+    private tenantCareService: TenantCareService,
   ) {}
 
   onModuleInit() {
@@ -132,5 +134,15 @@ export class TaskService implements OnModuleInit {
   })
   async monitorSystem() {
     this.logger.log('Monitor system task is not implemented yet');
+  }
+
+  @Task({
+    name: 'task.nurseDailyReport',
+    description: 'Generate tenant AI daily reports for caregiver-bound devices',
+  })
+  async nurseDailyReport(dateStr?: string) {
+    const normalizedDate = String(dateStr || '').trim() || undefined;
+    const result = await this.tenantCareService.generateScheduledDailyReports(normalizedDate);
+    this.logger.log(`Tenant AI daily report task finished: ${JSON.stringify(result)}`);
   }
 }

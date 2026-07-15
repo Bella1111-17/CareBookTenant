@@ -3546,819 +3546,6 @@
         ]
       }
     },
-    "/monitor/server": {
-      "get": {
-        "operationId": "ServerController_getInfo",
-        "summary": "在线用户-列表",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "系统监控-服务监控"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache": {
-      "get": {
-        "operationId": "CacheController_getInfo",
-        "summary": "缓存监控信息",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache/getNames": {
-      "get": {
-        "operationId": "CacheController_getNames",
-        "summary": "缓存列表",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache/getKeys/{id}": {
-      "get": {
-        "operationId": "CacheController_getKeys",
-        "summary": "键名列表",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache/getValue/{cacheName}/{cacheKey}": {
-      "get": {
-        "operationId": "CacheController_getValue",
-        "summary": "缓存内容",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache/clearCacheName/{cacheName}": {
-      "delete": {
-        "operationId": "CacheController_clearCacheName",
-        "summary": "清理缓存名称",
-        "parameters": [
-          {
-            "name": "cacheName",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache/clearCacheKey/{cacheKey}": {
-      "delete": {
-        "operationId": "CacheController_clearCacheKey",
-        "summary": "清理缓存键名",
-        "parameters": [
-          {
-            "name": "cacheKey",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/cache/clearCacheAll": {
-      "delete": {
-        "operationId": "CacheController_clearCacheAll",
-        "summary": "清理全部",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "缓存管理"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/logininfor/list": {
-      "get": {
-        "operationId": "LoginlogController_findAll",
-        "summary": "登录日志-列表",
-        "parameters": [
-          {
-            "name": "pageNum",
-            "required": true,
-            "in": "query",
-            "description": "当前分页",
-            "schema": {
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": true,
-            "in": "query",
-            "description": "每页数量",
-            "schema": {
-              "default": 10,
-              "type": "number"
-            }
-          },
-          {
-            "name": "orderByColumn",
-            "required": false,
-            "in": "query",
-            "description": "排序字段",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "isAsc",
-            "required": false,
-            "in": "query",
-            "description": "排序规则",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ipaddr",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userName",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListLoginlogDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "登录日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/logininfor/clean": {
-      "delete": {
-        "operationId": "LoginlogController_removeAll",
-        "summary": "登录日志-清除全部日志",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "登录日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/logininfor/{id}": {
-      "delete": {
-        "operationId": "LoginlogController_remove",
-        "summary": "登录日志-删除日志",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "登录日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/logininfor/export": {
-      "post": {
-        "operationId": "LoginlogController_export",
-        "summary": "导出登录日志为xlsx文件",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListLoginlogDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "登录日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/online/list": {
-      "get": {
-        "operationId": "OnlineController_findAll",
-        "summary": "在线用户-列表",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OnlineListDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "系统监控-在线用户"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/online/{token}": {
-      "delete": {
-        "operationId": "OnlineController_delete",
-        "summary": "在线用户-强退",
-        "parameters": [
-          {
-            "name": "token",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "系统监控-在线用户"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/operlog/clean": {
-      "delete": {
-        "operationId": "OperlogController_removeAll",
-        "summary": "操作日志-清除全部日志",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "操作日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/operlog/list": {
-      "get": {
-        "operationId": "OperlogController_findAll",
-        "summary": "操作日志-列表",
-        "parameters": [
-          {
-            "name": "operId",
-            "required": false,
-            "in": "query",
-            "description": "日志主键",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "title",
-            "required": false,
-            "in": "query",
-            "description": "模块标题",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "businessType",
-            "required": false,
-            "in": "query",
-            "description": "业务类型",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "requestMethod",
-            "required": false,
-            "in": "query",
-            "description": "请求方式",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "operatorType",
-            "required": false,
-            "in": "query",
-            "description": "操作类别",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "operName",
-            "required": false,
-            "in": "query",
-            "description": "操作人员",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "deptName",
-            "required": false,
-            "in": "query",
-            "description": "部门名称",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "operUrl",
-            "required": false,
-            "in": "query",
-            "description": "请求URL",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "operLocation",
-            "required": false,
-            "in": "query",
-            "description": "操作地点",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "operParam",
-            "required": false,
-            "in": "query",
-            "description": "请求参数",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "jsonResult",
-            "required": false,
-            "in": "query",
-            "description": "返回参数",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "errorMsg",
-            "required": false,
-            "in": "query",
-            "description": "错误消息",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "method",
-            "required": false,
-            "in": "query",
-            "description": "方法名称",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "operIp",
-            "required": false,
-            "in": "query",
-            "description": "主机地址",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "operTime",
-            "required": false,
-            "in": "query",
-            "description": "操作时间",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "description": "登录状态",
-            "schema": {
-              "enum": [
-                "0",
-                "1"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "costTime",
-            "required": false,
-            "in": "query",
-            "description": "消耗时间",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "pageNum",
-            "required": true,
-            "in": "query",
-            "description": "当前分页",
-            "schema": {
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": true,
-            "in": "query",
-            "description": "每页数量",
-            "schema": {
-              "default": 10,
-              "type": "number"
-            }
-          },
-          {
-            "name": "orderByColumn",
-            "required": false,
-            "in": "query",
-            "description": "排序字段",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "isAsc",
-            "required": false,
-            "in": "query",
-            "description": "排序规则",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResultData"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "type": "object",
-                          "properties": {
-                            "list": {
-                              "type": "array",
-                              "items": {
-                                "$ref": "#/components/schemas/QueryOperLogDto"
-                              }
-                            },
-                            "total": {
-                              "type": "number",
-                              "default": 0
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "操作日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/operlog/{operId}": {
-      "get": {
-        "operationId": "OperlogController_findOne",
-        "summary": "操作日志记录-详情",
-        "parameters": [
-          {
-            "name": "operId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResultData"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/BaseOperLogDto"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "操作日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "OperlogController_remove",
-        "summary": "操作日志-删除",
-        "parameters": [
-          {
-            "name": "operId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "操作日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/monitor/operlog/export": {
-      "post": {
-        "operationId": "OperlogController_exportData",
-        "summary": "导出操作日志数据为xlsx",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QueryOperLogDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "操作日志"
-        ],
-        "security": [
-          {
-            "Authorization": []
-          }
-        ]
-      }
-    },
-    "/hardware/badge/callback": {
-      "post": {
-        "operationId": "SmartBadgeController_callback",
-        "summary": "护理设备数据回调",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BadgeCallbackDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "硬件-护理设备回调"
-        ]
-      }
-    },
     "/tenant-care/org-unit": {
       "post": {
         "operationId": "TenantCareController_createOrgUnit",
@@ -5534,6 +4721,819 @@
           "租户护理"
         ]
       }
+    },
+    "/monitor/server": {
+      "get": {
+        "operationId": "ServerController_getInfo",
+        "summary": "在线用户-列表",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "系统监控-服务监控"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache": {
+      "get": {
+        "operationId": "CacheController_getInfo",
+        "summary": "缓存监控信息",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache/getNames": {
+      "get": {
+        "operationId": "CacheController_getNames",
+        "summary": "缓存列表",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache/getKeys/{id}": {
+      "get": {
+        "operationId": "CacheController_getKeys",
+        "summary": "键名列表",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache/getValue/{cacheName}/{cacheKey}": {
+      "get": {
+        "operationId": "CacheController_getValue",
+        "summary": "缓存内容",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache/clearCacheName/{cacheName}": {
+      "delete": {
+        "operationId": "CacheController_clearCacheName",
+        "summary": "清理缓存名称",
+        "parameters": [
+          {
+            "name": "cacheName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache/clearCacheKey/{cacheKey}": {
+      "delete": {
+        "operationId": "CacheController_clearCacheKey",
+        "summary": "清理缓存键名",
+        "parameters": [
+          {
+            "name": "cacheKey",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/cache/clearCacheAll": {
+      "delete": {
+        "operationId": "CacheController_clearCacheAll",
+        "summary": "清理全部",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "缓存管理"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/logininfor/list": {
+      "get": {
+        "operationId": "LoginlogController_findAll",
+        "summary": "登录日志-列表",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "required": true,
+            "in": "query",
+            "description": "当前分页",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": true,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "orderByColumn",
+            "required": false,
+            "in": "query",
+            "description": "排序字段",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isAsc",
+            "required": false,
+            "in": "query",
+            "description": "排序规则",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ipaddr",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userName",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListLoginlogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "登录日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/logininfor/clean": {
+      "delete": {
+        "operationId": "LoginlogController_removeAll",
+        "summary": "登录日志-清除全部日志",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "登录日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/logininfor/{id}": {
+      "delete": {
+        "operationId": "LoginlogController_remove",
+        "summary": "登录日志-删除日志",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "登录日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/logininfor/export": {
+      "post": {
+        "operationId": "LoginlogController_export",
+        "summary": "导出登录日志为xlsx文件",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListLoginlogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "登录日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/online/list": {
+      "get": {
+        "operationId": "OnlineController_findAll",
+        "summary": "在线用户-列表",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnlineListDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "系统监控-在线用户"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/online/{token}": {
+      "delete": {
+        "operationId": "OnlineController_delete",
+        "summary": "在线用户-强退",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "系统监控-在线用户"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/operlog/clean": {
+      "delete": {
+        "operationId": "OperlogController_removeAll",
+        "summary": "操作日志-清除全部日志",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "操作日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/operlog/list": {
+      "get": {
+        "operationId": "OperlogController_findAll",
+        "summary": "操作日志-列表",
+        "parameters": [
+          {
+            "name": "operId",
+            "required": false,
+            "in": "query",
+            "description": "日志主键",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "description": "模块标题",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessType",
+            "required": false,
+            "in": "query",
+            "description": "业务类型",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestMethod",
+            "required": false,
+            "in": "query",
+            "description": "请求方式",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operatorType",
+            "required": false,
+            "in": "query",
+            "description": "操作类别",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "operName",
+            "required": false,
+            "in": "query",
+            "description": "操作人员",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deptName",
+            "required": false,
+            "in": "query",
+            "description": "部门名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operUrl",
+            "required": false,
+            "in": "query",
+            "description": "请求URL",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operLocation",
+            "required": false,
+            "in": "query",
+            "description": "操作地点",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operParam",
+            "required": false,
+            "in": "query",
+            "description": "请求参数",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jsonResult",
+            "required": false,
+            "in": "query",
+            "description": "返回参数",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "errorMsg",
+            "required": false,
+            "in": "query",
+            "description": "错误消息",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "method",
+            "required": false,
+            "in": "query",
+            "description": "方法名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operIp",
+            "required": false,
+            "in": "query",
+            "description": "主机地址",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operTime",
+            "required": false,
+            "in": "query",
+            "description": "操作时间",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "登录状态",
+            "schema": {
+              "enum": [
+                "0",
+                "1"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "costTime",
+            "required": false,
+            "in": "query",
+            "description": "消耗时间",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageNum",
+            "required": true,
+            "in": "query",
+            "description": "当前分页",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": true,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "orderByColumn",
+            "required": false,
+            "in": "query",
+            "description": "排序字段",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isAsc",
+            "required": false,
+            "in": "query",
+            "description": "排序规则",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResultData"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "list": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/QueryOperLogDto"
+                              }
+                            },
+                            "total": {
+                              "type": "number",
+                              "default": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "操作日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/operlog/{operId}": {
+      "get": {
+        "operationId": "OperlogController_findOne",
+        "summary": "操作日志记录-详情",
+        "parameters": [
+          {
+            "name": "operId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResultData"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BaseOperLogDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "操作日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "OperlogController_remove",
+        "summary": "操作日志-删除",
+        "parameters": [
+          {
+            "name": "operId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "操作日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/monitor/operlog/export": {
+      "post": {
+        "operationId": "OperlogController_exportData",
+        "summary": "导出操作日志数据为xlsx",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryOperLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "操作日志"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/hardware/badge/callback": {
+      "post": {
+        "operationId": "SmartBadgeController_callback",
+        "summary": "护理设备数据回调",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeCallbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "硬件-护理设备回调"
+        ]
+      }
     }
   },
   "info": {
@@ -6652,6 +6652,293 @@
           "status"
         ]
       },
+      "CreateTenantOrgUnitDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "unitName": {
+            "type": "string",
+            "description": ""
+          },
+          "parentId": {
+            "type": "number",
+            "description": ""
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "unitName"
+        ]
+      },
+      "UpdateTenantOrgUnitDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "unitName": {
+            "type": "string",
+            "description": ""
+          },
+          "parentId": {
+            "type": "number",
+            "description": ""
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": ""
+          },
+          "id": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [
+          "unitName",
+          "id"
+        ]
+      },
+      "CreateTenantCaregiverDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "realName": {
+            "type": "string",
+            "description": ""
+          },
+          "phone": {
+            "type": "string",
+            "description": ""
+          },
+          "orgUnitId": {
+            "type": "number",
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": ""
+          },
+          "qualification": {
+            "type": "string",
+            "description": ""
+          },
+          "healthCertificate": {
+            "type": "string",
+            "description": ""
+          },
+          "skillTags": {
+            "description": "",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "remark": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "realName"
+        ]
+      },
+      "UpdateTenantCaregiverDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "realName": {
+            "type": "string",
+            "description": ""
+          },
+          "phone": {
+            "type": "string",
+            "description": ""
+          },
+          "orgUnitId": {
+            "type": "number",
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": ""
+          },
+          "qualification": {
+            "type": "string",
+            "description": ""
+          },
+          "healthCertificate": {
+            "type": "string",
+            "description": ""
+          },
+          "skillTags": {
+            "description": "",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "remark": {
+            "type": "string",
+            "description": ""
+          },
+          "id": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [
+          "realName",
+          "id"
+        ]
+      },
+      "CreateTenantDeviceDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "deviceNo": {
+            "type": "string",
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": ""
+          },
+          "remark": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "deviceNo"
+        ]
+      },
+      "UpdateTenantDeviceDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "deviceNo": {
+            "type": "string",
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": ""
+          },
+          "remark": {
+            "type": "string",
+            "description": ""
+          },
+          "id": {
+            "type": "number",
+            "description": ""
+          }
+        },
+        "required": [
+          "deviceNo",
+          "id"
+        ]
+      },
+      "BindTenantBadgeDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "tenantCaregiverId": {
+            "type": "number",
+            "description": ""
+          },
+          "deviceNo": {
+            "type": "string",
+            "description": ""
+          },
+          "unbindReason": {
+            "type": "string",
+            "description": "换绑时关闭旧绑定的说明"
+          }
+        },
+        "required": [
+          "tenantCaregiverId",
+          "deviceNo"
+        ]
+      },
+      "UnbindTenantBadgeDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "deviceNo": {
+            "type": "string",
+            "description": ""
+          },
+          "unbindReason": {
+            "type": "string",
+            "description": "解绑说明"
+          }
+        },
+        "required": [
+          "deviceNo",
+          "unbindReason"
+        ]
+      },
+      "GenerateTenantDailyReportDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": ""
+          },
+          "deviceNo": {
+            "type": "string",
+            "description": ""
+          },
+          "fileName": {
+            "type": "string",
+            "description": ""
+          },
+          "allowUnboundAnalysis": {
+            "type": "boolean",
+            "description": ""
+          },
+          "dateStr": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "dateStr"
+        ]
+      },
       "ListLoginlogDto": {
         "type": "object",
         "properties": {
@@ -6939,293 +7226,6 @@
           "timeStamp",
           "deviceNo",
           "data"
-        ]
-      },
-      "CreateTenantOrgUnitDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "unitName": {
-            "type": "string",
-            "description": ""
-          },
-          "parentId": {
-            "type": "number",
-            "description": ""
-          },
-          "sortOrder": {
-            "type": "number",
-            "description": ""
-          },
-          "status": {
-            "type": "string",
-            "description": ""
-          }
-        },
-        "required": [
-          "unitName"
-        ]
-      },
-      "UpdateTenantOrgUnitDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "unitName": {
-            "type": "string",
-            "description": ""
-          },
-          "parentId": {
-            "type": "number",
-            "description": ""
-          },
-          "sortOrder": {
-            "type": "number",
-            "description": ""
-          },
-          "status": {
-            "type": "string",
-            "description": ""
-          },
-          "id": {
-            "type": "number",
-            "description": ""
-          }
-        },
-        "required": [
-          "unitName",
-          "id"
-        ]
-      },
-      "CreateTenantCaregiverDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "realName": {
-            "type": "string",
-            "description": ""
-          },
-          "phone": {
-            "type": "string",
-            "description": ""
-          },
-          "orgUnitId": {
-            "type": "number",
-            "description": ""
-          },
-          "status": {
-            "type": "string",
-            "description": ""
-          },
-          "qualification": {
-            "type": "string",
-            "description": ""
-          },
-          "healthCertificate": {
-            "type": "string",
-            "description": ""
-          },
-          "skillTags": {
-            "description": "",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "remark": {
-            "type": "string",
-            "description": ""
-          }
-        },
-        "required": [
-          "realName"
-        ]
-      },
-      "UpdateTenantCaregiverDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "realName": {
-            "type": "string",
-            "description": ""
-          },
-          "phone": {
-            "type": "string",
-            "description": ""
-          },
-          "orgUnitId": {
-            "type": "number",
-            "description": ""
-          },
-          "status": {
-            "type": "string",
-            "description": ""
-          },
-          "qualification": {
-            "type": "string",
-            "description": ""
-          },
-          "healthCertificate": {
-            "type": "string",
-            "description": ""
-          },
-          "skillTags": {
-            "description": "",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "remark": {
-            "type": "string",
-            "description": ""
-          },
-          "id": {
-            "type": "number",
-            "description": ""
-          }
-        },
-        "required": [
-          "realName",
-          "id"
-        ]
-      },
-      "CreateTenantDeviceDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "deviceNo": {
-            "type": "string",
-            "description": ""
-          },
-          "status": {
-            "type": "string",
-            "description": ""
-          },
-          "remark": {
-            "type": "string",
-            "description": ""
-          }
-        },
-        "required": [
-          "deviceNo"
-        ]
-      },
-      "UpdateTenantDeviceDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "deviceNo": {
-            "type": "string",
-            "description": ""
-          },
-          "status": {
-            "type": "string",
-            "description": ""
-          },
-          "remark": {
-            "type": "string",
-            "description": ""
-          },
-          "id": {
-            "type": "number",
-            "description": ""
-          }
-        },
-        "required": [
-          "deviceNo",
-          "id"
-        ]
-      },
-      "BindTenantBadgeDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "tenantCaregiverId": {
-            "type": "number",
-            "description": ""
-          },
-          "deviceNo": {
-            "type": "string",
-            "description": ""
-          },
-          "unbindReason": {
-            "type": "string",
-            "description": "换绑时关闭旧绑定的说明"
-          }
-        },
-        "required": [
-          "tenantCaregiverId",
-          "deviceNo"
-        ]
-      },
-      "UnbindTenantBadgeDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "deviceNo": {
-            "type": "string",
-            "description": ""
-          },
-          "unbindReason": {
-            "type": "string",
-            "description": "解绑说明"
-          }
-        },
-        "required": [
-          "deviceNo",
-          "unbindReason"
-        ]
-      },
-      "GenerateTenantDailyReportDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": ""
-          },
-          "deviceNo": {
-            "type": "string",
-            "description": ""
-          },
-          "fileName": {
-            "type": "string",
-            "description": ""
-          },
-          "allowUnboundAnalysis": {
-            "type": "boolean",
-            "description": ""
-          },
-          "dateStr": {
-            "type": "string",
-            "description": ""
-          }
-        },
-        "required": [
-          "dateStr"
         ]
       }
     }

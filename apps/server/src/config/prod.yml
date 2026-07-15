@@ -67,7 +67,7 @@ hardwareAudio:
   ossPrefix: 'hardware-audio'
 
 dashscope:
-  apiKey: '${TOB_DASHSCOPE_API_KEY}'
+  apiKey: 'sk-ws-H.RYIMRXP.7Gnz.MEUCIEcGZBohs4R5h8YTxn4cstkS71W19WZrJsmlc8q5LsqHAiEAmukvcbCFXaRCXJiQiwbKarzMkzdcmVlSjFMt90_f814'
   asrModel: 'fun-asr'
   baseUrl: 'https://dashscope.aliyuncs.com'
 
