@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { Agent } from 'https';
 import dayjs from 'dayjs';
-import { IsNull, Repository } from 'typeorm';
+import { EntityManager, IsNull, Repository } from 'typeorm';
 import { ResultData } from 'src/common/utils/result';
 import { TenantContextService } from 'src/common/tenant/tenant-context.service';
 import { applyTenantScope } from 'src/common/tenant/tenant-query';
@@ -22,9 +22,7 @@ import {
   CreateTenantDeviceDto,
   CreateTenantOrgUnitDto,
   DeviceFlowDto,
-  DistributeTenantDeviceDto,
   GenerateTenantDailyReportDto,
-  ListDeviceTenantBindingDto,
   ListTenantBindingDto,
   ListTenantCaregiverDto,
   ListTenantDailyReportDto,
@@ -33,14 +31,12 @@ import {
   ListTenantDeviceSummaryDto,
   ListTenantGpsDto,
   ListTenantRecordDto,
-  ReclaimTenantDeviceDto,
   TenantScopedPagingDto,
   UnbindTenantBadgeDto,
   UpdateTenantCaregiverDto,
   UpdateTenantDeviceDto,
   UpdateTenantOrgUnitDto,
 } from './dto';
-import { DeviceTenantBindingEntity } from './entities/device-tenant-binding.entity';
 import { TenantBadgeBindingEntity } from './entities/tenant-badge-binding.entity';
 import { TenantCaregiverEntity } from './entities/tenant-caregiver.entity';
 import { TenantDailyReportEntity } from './entities/tenant-daily-report.entity';
@@ -61,7 +57,6 @@ export class TenantCareService {
     @InjectRepository(DeviceGpsLogEntity) private readonly gpsRepo: Repository<DeviceGpsLogEntity>,
     @InjectRepository(DeviceEventLogEntity) private readonly eventRepo: Repository<DeviceEventLogEntity>,
     @InjectRepository(SysTenantEntity) private readonly tenantRepo: Repository<SysTenantEntity>,
-    @InjectRepository(DeviceTenantBindingEntity) private readonly deviceTenantBindingRepo: Repository<DeviceTenantBindingEntity>,
     @InjectRepository(UserEntity) private readonly userRepo: Repository<UserEntity>,
     private readonly tenantContextService: TenantContextService,
     private readonly http: HttpService,
@@ -91,10 +86,45 @@ export class TenantCareService {
     };
   }
 
-  private requirePlatformUser() {
-    if (!this.tenantContextService.isPlatformUser()) {
-      throw new ForbiddenException('Only platform users can distribute tenant devices');
+  private async ensureTenantDevice(
+    manager: EntityManager,
+    params: {
+      tenantId: string;
+      deviceNo: string;
+      device?: BadgeDeviceEntity | null;
+      status?: string;
+      remark?: string;
+    },
+  ) {
+    let device = params.device || (await manager.findOne(BadgeDeviceEntity, { where: { deviceNo: params.deviceNo } }));
+    if (device?.tenantId && device.tenantId !== params.tenantId) {
+      throw new ForbiddenException('设备已归属其他租户');
     }
+
+    if (!device) {
+      device = manager.create(BadgeDeviceEntity, {
+        tenantId: params.tenantId,
+        deviceNo: params.deviceNo,
+        firstSeenAt: null,
+        lastSeenAt: null,
+        lastDataType: '',
+        status: params.status || '0',
+        remark: params.remark || '',
+      });
+    } else {
+      device.tenantId = params.tenantId;
+      if (params.status) device.status = params.status;
+      if (params.remark !== undefined) device.remark = params.remark;
+    }
+    await manager.save(BadgeDeviceEntity, device);
+    return device;
+  }
+
+  private rejectPlatformDeviceWrite() {
+    if (this.tenantContextService.isPlatformUser()) {
+      return ResultData.fail(403, '平台用户仅支持查看设备，设备操作请由租户完成');
+    }
+    return null;
   }
 
   private page(qb: any, query: { pageNum?: number; pageSize?: number }) {
@@ -112,7 +142,7 @@ export class TenantCareService {
     return qb;
   }
 
-  private applyDeviceLogTenantScope(qb: any, logAlias: string, timeExpression: string, requestedTenantId?: string | null) {
+  private applyDeviceLogTenantScope(qb: any, logAlias: string, requestedTenantId?: string | null) {
     const requested = String(requestedTenantId || '').trim();
     const tenantId = this.tenantContextService.isPlatformUser() ? requested : this.tenantContextService.getTenantId();
 
@@ -121,12 +151,10 @@ export class TenantCareService {
         `
           EXISTS (
             SELECT 1
-              FROM device_tenant_binding dtb
-             WHERE dtb.del_flag = '0'
-               AND dtb.device_no = ${logAlias}.device_no
-               AND dtb.tenant_id = :tenantScopeTenantId
-               AND dtb.bind_at <= ${timeExpression}
-               AND (dtb.unbind_at IS NULL OR dtb.unbind_at >= ${timeExpression})
+              FROM badge_device d
+             WHERE d.del_flag = '0'
+               AND d.device_no = ${logAlias}.device_no
+               AND d.tenant_id = :tenantScopeTenantId
           )
         `,
         { tenantScopeTenantId: tenantId },
@@ -288,28 +316,46 @@ export class TenantCareService {
   }
 
   async createDevice(dto: CreateTenantDeviceDto) {
-    const tenantId = this.tenantContextService.isPlatformUser() && !dto.tenantId ? null : this.resolveWriteTenantId(dto.tenantId);
+    const platformWriteResult = this.rejectPlatformDeviceWrite();
+    if (platformWriteResult) return platformWriteResult;
+    const tenantId = this.resolveWriteTenantId(dto.tenantId);
     const deviceNo = this.normalizeDeviceNo(dto.deviceNo);
     if (!deviceNo) return ResultData.fail(400, '设备编号不能为空');
 
     const exists = await this.deviceRepo.findOne({ where: { deviceNo } });
     if (exists && exists.delFlag === '0') return ResultData.fail(400, `设备已存在: ${deviceNo}`);
-    if (exists && exists.delFlag === '1') return ResultData.fail(400, `设备 ${deviceNo} 已删除，请联系平台恢复或更换编号`);
 
-    const entity = this.deviceRepo.create({
-      tenantId,
-      deviceNo,
-      firstSeenAt: null,
-      lastSeenAt: null,
-      lastDataType: '',
-      status: dto.status || '0',
-      remark: dto.remark?.trim() || '',
+    let saved: BadgeDeviceEntity;
+    await this.deviceRepo.manager.transaction(async (manager) => {
+      if (exists?.delFlag === '1') {
+        await manager.delete(BadgeDeviceEntity, { id: exists.id });
+      }
+      saved = tenantId
+        ? await this.ensureTenantDevice(manager, {
+            tenantId,
+            deviceNo,
+            status: dto.status || '0',
+            remark: dto.remark?.trim() || '',
+          })
+        : await manager.save(
+            BadgeDeviceEntity,
+            manager.create(BadgeDeviceEntity, {
+              tenantId,
+              deviceNo,
+              firstSeenAt: null,
+              lastSeenAt: null,
+              lastDataType: '',
+              status: dto.status || '0',
+              remark: dto.remark?.trim() || '',
+            }),
+          );
     });
-    await this.deviceRepo.save(entity);
-    return ResultData.ok(entity, '新增设备成功');
+    return ResultData.ok(saved, '新增设备成功');
   }
 
   async updateDevice(dto: UpdateTenantDeviceDto) {
+    const platformWriteResult = this.rejectPlatformDeviceWrite();
+    if (platformWriteResult) return platformWriteResult;
     const device = await this.deviceRepo.findOne({ where: { id: dto.id, delFlag: '0' } });
     if (!device) return ResultData.fail(404, '设备不存在');
     this.ensureTenantAccess(device.tenantId);
@@ -341,27 +387,16 @@ export class TenantCareService {
     this.page(qb, query);
     const [devices, total] = await Promise.all([qb.getMany(), countQb.getCount()]);
     const deviceNos = devices.map((item) => item.deviceNo);
-    const tenantBindings = deviceNos.length
-      ? await this.deviceTenantBindingRepo
-          .createQueryBuilder('tb')
-          .leftJoin(SysTenantEntity, 't', 't.tenantId = tb.tenantId AND t.delFlag = :tenantDelFlag', { tenantDelFlag: '0' })
-          .select(['tb.deviceNo AS deviceNo', 'tb.tenantId AS tenantId', 'tb.bindAt AS bindAt', 't.tenantName AS tenantName'])
-          .where('tb.delFlag = :delFlag', { delFlag: '0' })
-          .andWhere('tb.deviceNo IN (:...deviceNos)', { deviceNos })
-          .andWhere('tb.unbindAt IS NULL')
+    const tenantIds = Array.from(new Set(devices.map((item) => item.tenantId).filter(Boolean)));
+    const tenantRows = tenantIds.length
+      ? await this.tenantRepo
+          .createQueryBuilder('t')
+          .select(['t.tenantId AS tenantId', 't.tenantName AS tenantName'])
+          .where('t.delFlag = :delFlag', { delFlag: '0' })
+          .andWhere('t.tenantId IN (:...tenantIds)', { tenantIds })
           .getRawMany()
       : [];
-    const tenantBindingMap = new Map(
-      tenantBindings.map((item) => {
-        const binding = {
-          deviceNo: item.deviceNo ?? item.deviceno,
-          tenantId: item.tenantId ?? item.tenantid,
-          tenantName: item.tenantName ?? item.tenantname ?? '',
-          bindAt: item.bindAt ?? item.bindat,
-        };
-        return [binding.deviceNo, binding];
-      }),
-    );
+    const tenantNameMap = new Map(tenantRows.map((item) => [item.tenantId ?? item.tenantid, item.tenantName ?? item.tenantname ?? '']));
     const bindings = deviceNos.length
       ? await this.bindingRepo
           .createQueryBuilder('b')
@@ -387,16 +422,13 @@ export class TenantCareService {
     );
     let list = devices.map((item) => {
       const currentBinding = bindingMap.get(item.deviceNo) || null;
-      const currentTenantBinding = tenantBindingMap.get(item.deviceNo) || null;
-      const effectiveTenantId = currentTenantBinding?.tenantId || currentBinding?.tenantId || item.tenantId || null;
+      const effectiveTenantId = item.tenantId || currentBinding?.tenantId || null;
       return {
         ...item,
         tenantId: effectiveTenantId,
         deviceTenantId: item.tenantId,
         effectiveTenantId,
-        currentTenantBinding,
-        tenantName: currentTenantBinding?.tenantName || '',
-        lastDistributedAt: currentTenantBinding?.bindAt || null,
+        tenantName: effectiveTenantId ? tenantNameMap.get(effectiveTenantId) || '' : '',
         lastBoundAt: currentBinding?.bindAt || null,
         bindingStatus: currentBinding ? 'BOUND' : 'IDLE',
         currentBinding,
@@ -530,105 +562,9 @@ export class TenantCareService {
     return ResultData.ok({ list, total });
   }
 
-  async distributeDevice(dto: DistributeTenantDeviceDto) {
-    this.requirePlatformUser();
-    const tenantId = String(dto.tenantId || '').trim();
-    const deviceNo = this.normalizeDeviceNo(dto.deviceNo);
-    const unbindReason = this.normalizeReason(dto.unbindReason);
-    if (!tenantId) return ResultData.fail(400, 'tenantId is required');
-    if (!deviceNo) return ResultData.fail(400, 'deviceNo is required');
-
-    const tenant = await this.tenantRepo.findOne({ where: { tenantId, delFlag: '0' } });
-    if (!tenant) return ResultData.fail(404, 'tenant not found');
-    const activeTenantBinding = await this.deviceTenantBindingRepo.findOne({ where: { deviceNo, unbindAt: IsNull(), delFlag: '0' } });
-    if (activeTenantBinding?.tenantId === tenantId) return ResultData.fail(400, 'device already distributed to tenant');
-    if (activeTenantBinding && !unbindReason) return ResultData.fail(400, 'unbindReason is required when redistributing');
-    const operator = await this.currentOperator();
-
-    await this.deviceTenantBindingRepo.manager.transaction(async (manager) => {
-      const now = new Date();
-      let device = await manager.findOne(BadgeDeviceEntity, { where: { deviceNo } });
-      if (!device) {
-        device = manager.create(BadgeDeviceEntity, { tenantId, deviceNo, firstSeenAt: null, lastSeenAt: null, lastDataType: '', status: '0' });
-      } else {
-        device.tenantId = tenantId;
-      }
-      await manager.save(BadgeDeviceEntity, device);
-      await manager
-        .createQueryBuilder()
-        .update(DeviceTenantBindingEntity)
-        .set({ unbindAt: now, unbindReason: unbindReason || 'redistribute', unbindOperatorId: operator.operatorId, unbindOperatorName: operator.operatorName, bindStatus: 'UNBOUND' })
-        .where('deviceNo = :deviceNo AND unbindAt IS NULL AND delFlag = :delFlag', { deviceNo, delFlag: '0' })
-        .execute();
-      await manager
-        .createQueryBuilder()
-        .update(TenantBadgeBindingEntity)
-        .set({ unbindAt: now, unbindReason: unbindReason || 'redistribute', unbindOperatorId: operator.operatorId, unbindOperatorName: operator.operatorName, bindStatus: 'UNBOUND' })
-        .where('deviceNo = :deviceNo AND unbindAt IS NULL AND delFlag = :delFlag', { deviceNo, delFlag: '0' })
-        .execute();
-      await manager.save(
-        DeviceTenantBindingEntity,
-        manager.create(DeviceTenantBindingEntity, { deviceNo, tenantId, bindAt: now, unbindAt: null, unbindReason: '', bindOperatorId: operator.operatorId, bindOperatorName: operator.operatorName, bindStatus: 'BOUND' }),
-      );
-    });
-    return ResultData.ok(null, 'distribute success');
-  }
-
-  async reclaimDevice(dto: ReclaimTenantDeviceDto) {
-    this.requirePlatformUser();
-    const deviceNo = this.normalizeDeviceNo(dto.deviceNo);
-    const unbindReason = this.normalizeReason(dto.unbindReason);
-    if (!deviceNo) return ResultData.fail(400, 'deviceNo is required');
-    if (!unbindReason) return ResultData.fail(400, 'unbindReason is required');
-    const activeTenantBinding = await this.deviceTenantBindingRepo.findOne({ where: { deviceNo, unbindAt: IsNull(), delFlag: '0' } });
-    if (!activeTenantBinding) return ResultData.fail(404, 'active tenant binding not found');
-    if (dto.tenantId && activeTenantBinding.tenantId !== dto.tenantId) return ResultData.fail(403, 'device does not belong to target tenant');
-    const operator = await this.currentOperator();
-    await this.deviceTenantBindingRepo.manager.transaction(async (manager) => {
-      const now = new Date();
-      await manager.update(DeviceTenantBindingEntity, { id: activeTenantBinding.id }, { unbindAt: now, unbindReason, unbindOperatorId: operator.operatorId, unbindOperatorName: operator.operatorName, bindStatus: 'UNBOUND' });
-      await manager
-        .createQueryBuilder()
-        .update(TenantBadgeBindingEntity)
-        .set({ unbindAt: now, unbindReason, unbindOperatorId: operator.operatorId, unbindOperatorName: operator.operatorName, bindStatus: 'UNBOUND' })
-        .where('tenantId = :tenantId AND deviceNo = :deviceNo AND unbindAt IS NULL AND delFlag = :delFlag', { tenantId: activeTenantBinding.tenantId, deviceNo, delFlag: '0' })
-        .execute();
-      await manager.update(BadgeDeviceEntity, { deviceNo }, { tenantId: null, updateTime: now });
-    });
-    return ResultData.ok(null, 'reclaim success');
-  }
-
-  async listDeviceTenantBindings(query: ListDeviceTenantBindingDto) {
-    const qb = this.deviceTenantBindingRepo
-      .createQueryBuilder('b')
-      .leftJoin(SysTenantEntity, 't', 't.tenantId = b.tenantId AND t.delFlag = :tenantDelFlag', { tenantDelFlag: '0' })
-      .select(['b'])
-      .addSelect(['t.tenantName AS tenantName'])
-      .where('b.delFlag = :delFlag', { delFlag: '0' })
-      .orderBy('b.bindAt', 'DESC');
-    applyTenantScope(qb as any, 'b', this.tenantContextService, { requestedTenantId: query.tenantId });
-    if (query.deviceNo) qb.andWhere('b.deviceNo LIKE :deviceNo', { deviceNo: `%${this.normalizeDeviceNo(query.deviceNo)}%` });
-    if (query.isCurrent) qb.andWhere('b.unbindAt IS NULL');
-    if (query.beginTime) qb.andWhere('b.bindAt >= :beginTime', { beginTime: `${query.beginTime} 00:00:00` });
-    if (query.endTime) qb.andWhere('b.bindAt <= :endTime', { endTime: `${query.endTime} 23:59:59` });
-    const countQb = qb.clone();
-    this.page(qb, query);
-    const [rows, total] = await Promise.all([qb.getRawAndEntities(), countQb.getCount()]);
-    const list = rows.entities.map((item, index) => ({ ...item, tenantName: rows.raw[index]?.tenantName || rows.raw[index]?.tenantname || '' }));
-    return ResultData.ok({ list, total });
-  }
-
   async deviceFlow(query: DeviceFlowDto) {
     const deviceNo = this.normalizeDeviceNo(query.deviceNo);
     if (!deviceNo) return ResultData.fail(400, 'deviceNo is required');
-    const tenantQb = this.deviceTenantBindingRepo
-      .createQueryBuilder('b')
-      .leftJoin(SysTenantEntity, 't', 't.tenantId = b.tenantId AND t.delFlag = :tenantDelFlag', { tenantDelFlag: '0' })
-      .select(['b'])
-      .addSelect('t.tenantName', 'tenantName')
-      .where('b.delFlag = :delFlag', { delFlag: '0' })
-      .andWhere('b.deviceNo = :deviceNo', { deviceNo });
-    applyTenantScope(tenantQb as any, 'b', this.tenantContextService, { requestedTenantId: query.tenantId });
     const caregiverQb = this.bindingRepo
       .createQueryBuilder('b')
       .leftJoin(SysTenantEntity, 't', 't.tenantId = b.tenantId AND t.delFlag = :tenantDelFlag', { tenantDelFlag: '0' })
@@ -638,14 +574,8 @@ export class TenantCareService {
       .where('b.delFlag = :delFlag', { delFlag: '0' })
       .andWhere('b.deviceNo = :deviceNo', { deviceNo });
     applyTenantScope(caregiverQb as any, 'b', this.tenantContextService, { requestedTenantId: query.tenantId });
-    const [tenantRows, caregiverRows] = await Promise.all([tenantQb.getRawAndEntities(), caregiverQb.getRawAndEntities()]);
+    const caregiverRows = await caregiverQb.getRawAndEntities();
     const events: any[] = [];
-    tenantRows.entities.forEach((item, index) => {
-      const raw = tenantRows.raw[index] || {};
-      const tenantName = raw.tenantName || raw.tenantname || '';
-      events.push({ eventType: 'TENANT_DISTRIBUTED', deviceNo, tenantId: item.tenantId, tenantName, caregiverId: null, caregiverName: '', eventTime: item.bindAt, reason: '', operatorName: item.bindOperatorName || '', statusText: `平台分发给 ${tenantName || item.tenantId}` });
-      if (item.unbindAt) events.push({ eventType: 'TENANT_RECLAIMED', deviceNo, tenantId: item.tenantId, tenantName, caregiverId: null, caregiverName: '', eventTime: item.unbindAt, reason: item.unbindReason || '', operatorName: item.unbindOperatorName || '', statusText: `平台收回 ${tenantName || item.tenantId} 的设备` });
-    });
     caregiverRows.entities.forEach((item, index) => {
       const raw = caregiverRows.raw[index] || {};
       const tenantName = raw.tenantName || raw.tenantname || '';
@@ -681,6 +611,8 @@ export class TenantCareService {
   }
 
   async deleteDevice(id: number) {
+    const platformWriteResult = this.rejectPlatformDeviceWrite();
+    if (platformWriteResult) return platformWriteResult;
     const device = await this.deviceRepo.findOne({ where: { id, delFlag: '0' } });
     if (!device) return ResultData.fail(404, '设备不存在');
 
@@ -698,11 +630,15 @@ export class TenantCareService {
       return ResultData.fail(400, '设备存在当前有效绑定，请先解绑再删除');
     }
 
-    await this.deviceRepo.update({ id }, { delFlag: '1', updateTime: new Date() });
+    await this.deviceRepo.manager.transaction(async (manager) => {
+      await manager.delete(BadgeDeviceEntity, { id });
+    });
     return ResultData.ok(null, '删除成功');
   }
 
   async bindBadge(dto: BindTenantBadgeDto) {
+    const platformWriteResult = this.rejectPlatformDeviceWrite();
+    if (platformWriteResult) return platformWriteResult;
     const tenantId = this.resolveWriteTenantId(dto.tenantId);
     const deviceNo = this.normalizeDeviceNo(dto.deviceNo);
     const unbindReason = this.normalizeReason(dto.unbindReason);
@@ -712,11 +648,8 @@ export class TenantCareService {
     if (!caregiver) return ResultData.fail(404, '租户护工不存在');
     if (caregiver.tenantId !== tenantId) return ResultData.fail(403, '护工不属于目标租户');
 
-    const device = await this.deviceRepo.findOne({ where: { deviceNo, delFlag: '0' } });
-    if (!device) return ResultData.fail(404, '设备不存在，请先由平台创建设备或分发设备');
-    if (device.tenantId !== tenantId) return ResultData.fail(403, '设备未归属当前租户');
-    const activeTenantBinding = await this.deviceTenantBindingRepo.findOne({ where: { tenantId, deviceNo, unbindAt: IsNull(), delFlag: '0' } });
-    if (!activeTenantBinding) return ResultData.fail(403, '设备未分发给当前租户，不能绑定护工');
+    const device = await this.deviceRepo.findOne({ where: { deviceNo } });
+    if (device?.tenantId && device.tenantId !== tenantId) return ResultData.fail(403, '设备已归属其他租户');
 
     const [activeDeviceBinding, activeCaregiverBinding] = await Promise.all([
       this.bindingRepo.findOne({ where: { tenantId, deviceNo, unbindAt: IsNull(), delFlag: '0' } }),
@@ -731,6 +664,14 @@ export class TenantCareService {
 
     await this.bindingRepo.manager.transaction(async (manager) => {
       const now = new Date();
+      if (device?.delFlag === '1') {
+        await manager.delete(BadgeDeviceEntity, { id: device.id });
+      }
+      await this.ensureTenantDevice(manager, {
+        tenantId,
+        deviceNo,
+        device: device?.delFlag === '1' ? null : device,
+      });
       await manager
         .createQueryBuilder()
         .update(TenantBadgeBindingEntity)
@@ -766,6 +707,8 @@ export class TenantCareService {
   }
 
   async unbindBadge(dto: UnbindTenantBadgeDto) {
+    const platformWriteResult = this.rejectPlatformDeviceWrite();
+    if (platformWriteResult) return platformWriteResult;
     const deviceNo = this.normalizeDeviceNo(dto.deviceNo);
     const unbindReason = this.normalizeReason(dto.unbindReason);
     if (!unbindReason) return ResultData.fail(400, '解绑说明不能为空');
@@ -815,8 +758,8 @@ export class TenantCareService {
 
   async listRecords(query: ListTenantRecordDto) {
     const qb = this.audioRepo.createQueryBuilder('a').where('a.delFlag = :delFlag', { delFlag: '0' }).orderBy('a.id', 'DESC');
-    this.applyDeviceLogTenantScope(qb, 'a', 'COALESCE(a.start_time, a.create_time)', query.tenantId);
-    if (query.deviceNo) qb.andWhere('a.deviceNo LIKE :deviceNo', { deviceNo: `%${this.normalizeDeviceNo(query.deviceNo)}%` });
+    this.applyDeviceLogTenantScope(qb, 'a', query.tenantId);
+    if (query.deviceNo) qb.andWhere('a.deviceNo = :deviceNo', { deviceNo: this.normalizeDeviceNo(query.deviceNo) });
     if (query.asrStatus) qb.andWhere('a.asrStatus = :asrStatus', { asrStatus: query.asrStatus });
     if (query.isolationStatus) qb.andWhere('a.isolationStatus = :isolationStatus', { isolationStatus: query.isolationStatus });
     if (query.params?.beginTime && query.params?.endTime) {
@@ -849,7 +792,7 @@ export class TenantCareService {
       .where('g.delFlag = :delFlag', { delFlag: '0' })
       .orderBy('g.reportTime', 'DESC', 'NULLS LAST')
       .addOrderBy('g.createdAt', 'DESC');
-    this.applyDeviceLogTenantScope(qb, 'g', 'COALESCE(g.report_time, g.created_at)', query.tenantId);
+    this.applyDeviceLogTenantScope(qb, 'g', query.tenantId);
 
     if (query.deviceNo) qb.andWhere('g.deviceNo LIKE :deviceNo', { deviceNo: `%${this.normalizeDeviceNo(query.deviceNo)}%` });
     if (query.tenantCaregiverId) qb.andWhere('b.tenantCaregiverId = :tenantCaregiverId', { tenantCaregiverId: query.tenantCaregiverId });
@@ -889,7 +832,7 @@ export class TenantCareService {
       .addSelect('c.phone', 'caregiverPhone')
       .where('e.delFlag = :delFlag', { delFlag: '0' })
       .orderBy('e.createdAt', 'DESC');
-    this.applyDeviceLogTenantScope(qb, 'e', 'e.created_at', query.tenantId);
+    this.applyDeviceLogTenantScope(qb, 'e', query.tenantId);
 
     if (query.deviceNo) qb.andWhere('e.deviceNo LIKE :deviceNo', { deviceNo: `%${this.normalizeDeviceNo(query.deviceNo)}%` });
     if (query.eventType) qb.andWhere('e.eventType = :eventType', { eventType: query.eventType });
@@ -947,7 +890,7 @@ export class TenantCareService {
       return qb.orderBy('a.startTime', 'ASC').getMany();
     }
 
-    this.applyDeviceLogTenantScope(qb, 'a', 'COALESCE(a.start_time, a.create_time)', tenantId);
+    this.applyDeviceLogTenantScope(qb, 'a', tenantId);
     return qb.andWhere('a.isolationStatus = :isolationStatus', { isolationStatus: 'NORMAL' }).orderBy('a.startTime', 'ASC').getMany();
   }
 

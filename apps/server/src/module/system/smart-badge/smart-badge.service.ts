@@ -216,14 +216,8 @@ export class SmartBadgeService {
       return current;
     }
 
-    const created = this.deviceRepo.create({
-      tenantId: this.resolveWriteTenantId(tenantId),
-      deviceNo: normalizedDeviceNo,
-      firstSeenAt: seenAt,
-      lastSeenAt: seenAt,
-      lastDataType: dataType || '',
-    });
-    return this.deviceRepo.save(created);
+    // 不再自动创建设备，设备必须通过管理后台录入后才能使用
+    return null;
   }
 
   private rejectUnresolvedDeviceTenant(deviceNo: string, dataType: string) {
@@ -276,20 +270,11 @@ export class SmartBadgeService {
       };
     }
 
-    const [deviceTenantBinding] = await this.tenantBindingRepo.query(
-      `
-        SELECT tenant_id AS "tenantId"
-          FROM device_tenant_binding
-         WHERE device_no = $1
-           AND del_flag = '0'
-           AND bind_at <= $2
-           AND (unbind_at IS NULL OR unbind_at >= $2)
-         ORDER BY bind_at DESC
-         LIMIT 1
-      `,
-      [deviceNo, timestamp],
-    );
-    let tenantId = deviceTenantBinding?.tenantId ?? null;
+    const device = await this.deviceRepo.findOne({
+      where: { deviceNo, delFlag: '0' },
+      select: ['tenantId'],
+    });
+    let tenantId = device?.tenantId ?? null;
     if (tenantId) {
       return {
         userId,
@@ -315,7 +300,17 @@ export class SmartBadgeService {
     const normalizedDeviceNo = this.normalizeDeviceNo(deviceNo);
     const seenAt = new Date();
     const binding = await this.resolveBindingByDeviceAndTime(normalizedDeviceNo, seenAt);
-    await this.ensureDeviceRegistered(normalizedDeviceNo, dataType, seenAt, binding.tenantId);
+    const device = await this.ensureDeviceRegistered(normalizedDeviceNo, dataType, seenAt, binding.tenantId);
+    if (!device) {
+      this.logger.debug(`设备 ${normalizedDeviceNo} 未录入，跳过回调处理`);
+      return ResultData.ok(null, '设备未录入，已忽略');
+    }
+    // 如果没有租户归属但设备有 tenantId，直接使用设备的 tenantId
+    if (!binding.tenantId && device.tenantId) {
+      binding.tenantId = device.tenantId;
+      binding.isolationStatus = 'NORMAL';
+      binding.isolationReason = null;
+    }
 
     switch (dataType) {
       case 'Audio':
@@ -345,6 +340,15 @@ export class SmartBadgeService {
   async handleAudio(data: AudioPushData, deviceNo: string, binding: BadgeResolvedBinding) {
     const startTime = this.parseYYMMDDHHmmss(data.startTime) || new Date();
     binding = await this.resolveBindingByDeviceAndTime(deviceNo, startTime);
+    // 如果没有租户归属但设备有 tenantId，直接使用设备的 tenantId
+    if (!binding.tenantId) {
+      const device = await this.deviceRepo.findOne({ where: { deviceNo }, select: ['tenantId'] });
+      if (device?.tenantId) {
+        binding.tenantId = device.tenantId;
+        binding.isolationStatus = 'NORMAL';
+        binding.isolationReason = null;
+      }
+    }
     const endTime = data.endTime ? this.parseYYMMDDHHmmss(data.endTime) : null;
     const chunkIndex = this.parseChunkIndex(data.chunkIndex) ?? this.extractChunkFromFileName(data.fileName);
     const segmentType = this.extractSegmentType(data.fileName);
@@ -391,6 +395,15 @@ export class SmartBadgeService {
   async handleUploadLog(data: UploadLogPushData, deviceNo: string, binding: BadgeResolvedBinding) {
     const startTime = data.realStartTime ? new Date(data.realStartTime) : new Date();
     binding = await this.resolveBindingByDeviceAndTime(deviceNo, startTime);
+    // 如果没有租户归属但设备有 tenantId，直接使用设备的 tenantId
+    if (!binding.tenantId) {
+      const device = await this.deviceRepo.findOne({ where: { deviceNo }, select: ['tenantId'] });
+      if (device?.tenantId) {
+        binding.tenantId = device.tenantId;
+        binding.isolationStatus = 'NORMAL';
+        binding.isolationReason = null;
+      }
+    }
     const endTime = data.realEndTime ? new Date(data.realEndTime) : null;
     const ossKey = data.objectStoreUrl || '';
     const fileUrl = data.fileDownLoadUrl || (ossKey ? this.buildPublicUrl(ossKey) : '');
@@ -607,7 +620,8 @@ export class SmartBadgeService {
     this.ensureTenantAccess(user.tenantId);
     const tenantId = this.resolveWriteTenantId(user.tenantId ?? this.currentTenantId());
 
-    await this.ensureDeviceRegistered(normalizedDeviceNo, 'BindDevice', new Date(), tenantId);
+    const device = await this.ensureDeviceRegistered(normalizedDeviceNo, 'BindDevice', new Date(), tenantId);
+    if (!device) return ResultData.fail(400, `设备 ${normalizedDeviceNo} 不存在，请先在管理后台添加设备`);
 
     await this.bindingRepo.manager.transaction(async (manager) => {
       const now = new Date();
@@ -643,7 +657,8 @@ export class SmartBadgeService {
     const normalizedDeviceNo = this.normalizeDeviceNo(dto.deviceNo);
     const tenantId = await this.resolveTenantId(normalizedDeviceNo, null);
     this.ensureTenantAccess(tenantId);
-    await this.ensureDeviceRegistered(normalizedDeviceNo, 'UnbindDevice', new Date(), tenantId);
+    const device = await this.ensureDeviceRegistered(normalizedDeviceNo, 'UnbindDevice', new Date(), tenantId);
+    if (!device) return ResultData.fail(400, `设备 ${normalizedDeviceNo} 不存在`);
 
     await this.bindingRepo
       .createQueryBuilder()

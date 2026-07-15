@@ -6,9 +6,7 @@ import {
   CreateTenantDeviceDto,
   CreateTenantOrgUnitDto,
   DeviceFlowDto,
-  DistributeTenantDeviceDto,
   GenerateTenantDailyReportDto,
-  ListDeviceTenantBindingDto,
   ListTenantBindingDto,
   ListTenantCaregiverDto,
   ListTenantDailyReportDto,
@@ -17,7 +15,6 @@ import {
   ListTenantDeviceEventDto,
   ListTenantGpsDto,
   ListTenantRecordDto,
-  ReclaimTenantDeviceDto,
   TenantScopedPagingDto,
   UnbindTenantBadgeDto,
   UpdateTenantCaregiverDto,
@@ -108,28 +105,7 @@ export class TenantCareController {
   deviceSummaryDetail(@Query() query: ListTenantDeviceSummaryDetailDto) {
     return this.tenantCareService.deviceSummaryDetail(query);
   }
-
-  @ApiOperation({ summary: '平台分发设备给租户' })
-  @Post('/device/distribute')
-  @HttpCode(200)
-  distributeDevice(@Body() dto: DistributeTenantDeviceDto) {
-    return this.tenantCareService.distributeDevice(dto);
-  }
-
-  @ApiOperation({ summary: '平台收回租户设备' })
-  @Post('/device/reclaim')
-  @HttpCode(200)
-  reclaimDevice(@Body() dto: ReclaimTenantDeviceDto) {
-    return this.tenantCareService.reclaimDevice(dto);
-  }
-
-  @ApiOperation({ summary: '平台设备分发历史' })
-  @Get('/device/tenant-binding/list')
-  listDeviceTenantBindings(@Query() query: ListDeviceTenantBindingDto) {
-    return this.tenantCareService.listDeviceTenantBindings(query);
-  }
-
-  @ApiOperation({ summary: '设备流转时间线' })
+  @ApiOperation({ summary: '???????' })
   @Get('/device/flow')
   deviceFlow(@Query() query: DeviceFlowDto) {
     return this.tenantCareService.deviceFlow(query);

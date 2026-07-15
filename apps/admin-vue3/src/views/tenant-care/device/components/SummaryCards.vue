@@ -37,9 +37,9 @@ const summaryCards = computed(() => {
   if (isPlatformUser.value) {
     return [
       { label: '设备总数', value: props.summary.totalDevices, type: 'totalDevices' },
-      { label: '已分配租户', value: props.summary.assignedDevices, type: 'assignedDevices', valueClass: 'summary-card__value--blue' },
-      { label: '平台库存', value: props.summary.idleDevices, type: 'idleDevices', valueClass: 'summary-card__value--amber' },
-      { label: '已绑定租户数', value: props.summary.boundTenants, type: 'boundTenants', valueClass: 'summary-card__value--green' },
+      { label: '已归属租户', value: props.summary.assignedDevices, type: 'assignedDevices', valueClass: 'summary-card__value--blue' },
+      { label: '未归属设备', value: props.summary.idleDevices, type: 'idleDevices', valueClass: 'summary-card__value--amber' },
+      { label: '归属租户数', value: props.summary.boundTenants, type: 'boundTenants', valueClass: 'summary-card__value--green' },
     ]
   }
 

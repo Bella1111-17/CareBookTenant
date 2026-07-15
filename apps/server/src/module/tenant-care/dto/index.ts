@@ -183,39 +183,6 @@ export class ListTenantDeviceSummaryDetailDto extends TenantScopedPagingDto {
   type?: string;
 }
 
-export class DistributeTenantDeviceDto {
-  @ApiProperty({ description: '租户ID' })
-  @IsNotEmpty()
-  @IsString()
-  tenantId: string;
-
-  @ApiProperty({ description: '设备编号' })
-  @IsNotEmpty()
-  @IsString()
-  deviceNo: string;
-
-  @ApiPropertyOptional({ description: '转分发时关闭旧租户归属的说明' })
-  @IsOptional()
-  @IsString()
-  unbindReason?: string;
-}
-
-export class ReclaimTenantDeviceDto {
-  @ApiProperty({ description: '设备编号' })
-  @IsNotEmpty()
-  @IsString()
-  deviceNo: string;
-
-  @ApiProperty({ description: '收回说明' })
-  @IsNotEmpty()
-  @IsString()
-  unbindReason: string;
-
-  @ApiPropertyOptional({ description: '租户ID' })
-  @IsOptional()
-  @IsString()
-  tenantId?: string;
-}
 
 export class UnbindTenantBadgeDto {
   @ApiPropertyOptional({ description: '' })
@@ -261,27 +228,6 @@ export class ListTenantBindingDto extends TenantScopedPagingDto {
   endTime?: string;
 }
 
-export class ListDeviceTenantBindingDto extends TenantScopedPagingDto {
-  @ApiPropertyOptional({ description: '' })
-  @IsOptional()
-  @IsString()
-  deviceNo?: string;
-
-  @ApiPropertyOptional({ description: '' })
-  @IsOptional()
-  @Transform(({ value }) => value === true || value === 'true')
-  isCurrent?: boolean;
-
-  @ApiPropertyOptional({ description: '' })
-  @IsOptional()
-  @IsDateString()
-  beginTime?: string;
-
-  @ApiPropertyOptional({ description: '' })
-  @IsOptional()
-  @IsDateString()
-  endTime?: string;
-}
 
 export class DeviceFlowDto extends TenantScopedPagingDto {
   @ApiProperty({ description: '设备编号' })

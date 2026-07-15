@@ -60,6 +60,7 @@ describe('TenantCareService tenant isolation', () => {
     create: jest.fn((value) => value),
     save: jest.fn(),
     update: jest.fn(),
+    manager: { transaction: jest.fn() },
   };
   const audioRepo = {
     createQueryBuilder: jest.fn(),
@@ -73,11 +74,6 @@ describe('TenantCareService tenant isolation', () => {
   const tenantRepo = {
     createQueryBuilder: jest.fn(),
     findOne: jest.fn(),
-  };
-  const deviceTenantBindingRepo = {
-    createQueryBuilder: jest.fn(),
-    findOne: jest.fn(),
-    manager: { transaction: jest.fn() },
   };
   const userRepo = {
     findOne: jest.fn(),
@@ -94,9 +90,17 @@ describe('TenantCareService tenant isolation', () => {
   };
 
   let service: TenantCareService;
+  let deviceManager: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    deviceManager = {
+      findOne: jest.fn().mockResolvedValue(null),
+      create: jest.fn((_entity, value) => value),
+      save: jest.fn(async (_entity, value) => value),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
+      delete: jest.fn().mockResolvedValue({ affected: 1 }),
+    };
     caregiverRepo.findOne.mockResolvedValue(null);
     caregiverRepo.create.mockImplementation((value) => value);
     caregiverRepo.save.mockImplementation(async (value) => value);
@@ -108,6 +112,7 @@ describe('TenantCareService tenant isolation', () => {
     deviceRepo.create.mockImplementation((value) => value);
     deviceRepo.save.mockImplementation(async (value) => value);
     deviceRepo.update.mockResolvedValue({ affected: 1 });
+    deviceRepo.manager.transaction.mockImplementation(async (callback) => callback(deviceManager));
     reportRepo.findOne.mockResolvedValue(null);
     reportRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
     reportRepo.create.mockImplementation((value) => value);
@@ -118,9 +123,6 @@ describe('TenantCareService tenant isolation', () => {
     eventRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
     tenantRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
     tenantRepo.findOne.mockResolvedValue(null);
-    deviceTenantBindingRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
-    deviceTenantBindingRepo.findOne.mockResolvedValue(null);
-    deviceTenantBindingRepo.manager.transaction.mockResolvedValue(undefined);
     userRepo.findOne.mockResolvedValue(null);
     tenantContextService.getUserId.mockReturnValue(null);
     config.get.mockReturnValue('');
@@ -134,7 +136,6 @@ describe('TenantCareService tenant isolation', () => {
       gpsRepo as any,
       eventRepo as any,
       tenantRepo as any,
-      deviceTenantBindingRepo as any,
       userRepo as any,
       tenantContextService as any,
       http as any,
@@ -246,7 +247,7 @@ describe('TenantCareService tenant isolation', () => {
     );
   });
 
-  it('uses the active binding tenant when platform unbinds a device with stale device tenant', async () => {
+  it('rejects platform users unbinding devices because platform is read-only', async () => {
     tenantContextService.isPlatformUser.mockReturnValue(true);
     tenantContextService.getTenantId.mockReturnValue(null);
     deviceRepo.findOne.mockResolvedValue({ id: 1, deviceNo: 'BADGE-001', tenantId: 'platform-self' });
@@ -254,14 +255,8 @@ describe('TenantCareService tenant isolation', () => {
 
     const result = await service.unbindBadge({ deviceNo: 'BADGE-001', unbindReason: 'replace device' } as any);
 
-    expect(result.code).toBe(200);
-    expect(bindingRepo.update).toHaveBeenCalledWith(
-      { id: 9 },
-      expect.objectContaining({
-        unbindReason: 'replace device',
-        bindStatus: 'UNBOUND',
-      }),
-    );
+    expect(result.code).toBe(403);
+    expect(bindingRepo.update).not.toHaveBeenCalled();
   });
 
   it('creates tenant device under the current tenant for tenant users', async () => {
@@ -273,12 +268,44 @@ describe('TenantCareService tenant isolation', () => {
     const result = await service.createDevice({ deviceNo: 'badge-tenant-a', status: '0' } as any);
 
     expect(result.code).toBe(200);
-    expect(deviceRepo.create).toHaveBeenCalledWith(
+    expect(deviceManager.create).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
         tenantId: 'tenant-a',
         deviceNo: 'BADGE-TENANT-A',
       }),
     );
+  });
+
+  it('cleans up a historical soft-deleted row and creates a new tenant device', async () => {
+    tenantContextService.isPlatformUser.mockReturnValue(false);
+    tenantContextService.getTenantId.mockReturnValue('tenant-a');
+    const deletedDevice = { id: 7, tenantId: 'tenant-a', deviceNo: 'BADGE-DELETED', delFlag: '1', status: '1', remark: 'old' };
+    deviceRepo.findOne.mockResolvedValue(deletedDevice);
+
+    const result = await service.createDevice({ deviceNo: 'badge-deleted', status: '0', remark: 'new device' } as any);
+
+    expect(result.code).toBe(200);
+    expect(deviceManager.delete).toHaveBeenCalledWith(expect.anything(), { id: 7 });
+    expect(deviceManager.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        tenantId: 'tenant-a',
+        deviceNo: 'BADGE-DELETED',
+        status: '0',
+        remark: 'new device',
+      }),
+    );
+  });
+
+  it('rejects platform users creating tenant devices because platform is read-only', async () => {
+    tenantContextService.isPlatformUser.mockReturnValue(true);
+    tenantContextService.getTenantId.mockReturnValue(null);
+
+    const result = await service.createDevice({ tenantId: 'tenant-a', deviceNo: 'badge-platform' } as any);
+
+    expect(result.code).toBe(403);
+    expect(deviceRepo.manager.transaction).not.toHaveBeenCalled();
   });
 
   it('summarizes platform devices across all tenants when tenantId is not requested', async () => {
@@ -361,7 +388,7 @@ describe('TenantCareService tenant isolation', () => {
     expect(qb.orderBy).toHaveBeenCalledWith('g.reportTime', 'DESC', 'NULLS LAST');
   });
 
-  it('filters GPS logs for tenant users by device distribution history', async () => {
+  it('filters GPS logs for tenant users by device ownership', async () => {
     const qb = createQueryBuilderMock();
     gpsRepo.createQueryBuilder.mockReturnValue(qb);
     tenantContextService.isPlatformUser.mockReturnValue(false);
@@ -370,7 +397,7 @@ describe('TenantCareService tenant isolation', () => {
     await service.listGpsLogs({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
 
     expect(qb.leftJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = g.deviceNo'), expect.any(Object));
-    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('FROM badge_device d'), {
       tenantScopeTenantId: 'tenant-a',
     });
     expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('g.tenantId = :tenantScopeTenantId'), expect.anything());
@@ -390,7 +417,7 @@ describe('TenantCareService tenant isolation', () => {
     expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('tenantScopeTenantId'), expect.anything());
   });
 
-  it('filters device events for tenant users by device distribution history', async () => {
+  it('filters device events for tenant users by device ownership', async () => {
     const qb = createQueryBuilderMock();
     eventRepo.createQueryBuilder.mockReturnValue(qb);
     tenantContextService.isPlatformUser.mockReturnValue(false);
@@ -399,27 +426,28 @@ describe('TenantCareService tenant isolation', () => {
     await service.listDeviceEvents({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
 
     expect(qb.leftJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = e.deviceNo'), expect.any(Object));
-    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('FROM badge_device d'), {
       tenantScopeTenantId: 'tenant-a',
     });
     expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('e.tenantId = :tenantScopeTenantId'), expect.anything());
   });
 
-  it('filters record list for tenant users by device distribution history', async () => {
+  it('filters record list for tenant users by device ownership', async () => {
     const qb = createQueryBuilderMock();
     audioRepo.createQueryBuilder.mockReturnValue(qb);
     tenantContextService.isPlatformUser.mockReturnValue(false);
     tenantContextService.getTenantId.mockReturnValue('tenant-a');
 
-    await service.listRecords({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
+    await service.listRecords({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b', deviceNo: ' badge-001 ' } as any);
 
-    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('FROM badge_device d'), {
       tenantScopeTenantId: 'tenant-a',
     });
+    expect(qb.andWhere).toHaveBeenCalledWith('a.deviceNo = :deviceNo', { deviceNo: 'BADGE-001' });
     expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('a.tenantId = :tenantScopeTenantId'), expect.anything());
   });
 
-  it('uses device distribution history when generating tenant daily report chunks', async () => {
+  it('uses device ownership when generating tenant daily report chunks', async () => {
     const audioQb = createQueryBuilderMock();
     const reportQb = createQueryBuilderMock();
     const startTime = new Date('2026-07-04T18:25:11+08:00');
@@ -448,7 +476,7 @@ describe('TenantCareService tenant isolation', () => {
     } as any);
 
     expect(result.code).toBe(200);
-    expect(audioQb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
+    expect(audioQb.andWhere).toHaveBeenCalledWith(expect.stringContaining('FROM badge_device d'), {
       tenantScopeTenantId: 'tenant-a',
     });
     expect(audioQb.andWhere).not.toHaveBeenCalledWith('a.tenantId = :tenantId', expect.anything());
@@ -461,18 +489,18 @@ describe('TenantCareService tenant isolation', () => {
     const output = (service as any).extractWorkflowOutput({
       result: '',
       cleaned_transcript: '',
-      daily_report: '无有效护理交互记录，输入内容为技术开发讨论。',
-      emotion_summary: '无法评估被护理人情绪状态。',
+      daily_report: 'no valid care interaction',
+      emotion_summary: 'cannot evaluate emotion',
       service_score: {
         professionalism: 0,
         attitude: 0,
         responsiveness: 0,
         detail: 0,
-        comment: '无实际服务发生',
+        comment: 'no service happened',
       },
       report_card: {
         overallScore: 0,
-        aiSummary: '未检测到护工与被护理人的真实互动内容。',
+        aiSummary: 'no real interaction detected',
         dimensionScores: {
           communication: 0,
           operation: 0,
@@ -481,28 +509,27 @@ describe('TenantCareService tenant isolation', () => {
           care: 0,
           completeness: 0,
         },
-        scoreComment: '输入数据为技术调试对话，非护理场景。',
+        scoreComment: 'technical test conversation',
       },
     });
     const normalized = (service as any).normalizeWorkflowPayload(output);
 
-    expect(normalized.summaryText).toBe('无有效护理交互记录，输入内容为技术开发讨论。');
-    expect(normalized.emotionSummary).toBe('无法评估被护理人情绪状态。');
-    expect(normalized.serviceScore.comment).toBe('无实际服务发生');
-    expect(normalized.reportCard.aiSummary).toBe('无有效护理交互记录，输入内容为技术开发讨论。');
-    expect(normalized.reportCard.scoreComment).toBe('输入数据为技术调试对话，非护理场景。');
+    expect(normalized.summaryText).toBe('no valid care interaction');
+    expect(normalized.emotionSummary).toBe('cannot evaluate emotion');
+    expect(normalized.serviceScore.comment).toBe('no service happened');
+    expect(normalized.reportCard.aiSummary).toBe('no valid care interaction');
+    expect(normalized.reportCard.scoreComment).toBe('technical test conversation');
   });
 
   it('parses fenced JSON from Dify result', () => {
     const output = (service as any).extractWorkflowOutput({
-      result: '```json\n{"analysis_payload":{"summary":"已生成日报"},"score_payload":{"overallScore":8}}\n```',
+      result: '```json\n{"analysis_payload":{"summary":"report generated"},"score_payload":{"overallScore":8}}\n```',
     });
     const normalized = (service as any).normalizeWorkflowPayload(output);
 
-    expect(normalized.summaryText).toBe('已生成日报');
+    expect(normalized.summaryText).toBe('report generated');
     expect(normalized.reportCard.overallScore).toBe(8);
   });
-
   it('prevents deleting a tenant device while it has an active binding', async () => {
     tenantContextService.isPlatformUser.mockReturnValue(false);
     tenantContextService.getTenantId.mockReturnValue('tenant-a');
@@ -512,7 +539,19 @@ describe('TenantCareService tenant isolation', () => {
     const result = await service.deleteDevice(3);
 
     expect(result.code).toBe(400);
-    expect(deviceRepo.update).not.toHaveBeenCalled();
+    expect(deviceManager.delete).not.toHaveBeenCalled();
+  });
+
+  it('hard deletes an idle tenant device after tenant confirmation', async () => {
+    tenantContextService.isPlatformUser.mockReturnValue(false);
+    tenantContextService.getTenantId.mockReturnValue('tenant-a');
+    deviceRepo.findOne.mockResolvedValue({ id: 4, tenantId: 'tenant-a', deviceNo: 'BADGE-IDLE', delFlag: '0' });
+    bindingRepo.findOne.mockResolvedValue(null);
+
+    const result = await service.deleteDevice(4);
+
+    expect(result.code).toBe(200);
+    expect(deviceManager.delete).toHaveBeenCalledWith(expect.anything(), { id: 4 });
   });
 
   it('prevents deleting a tenant caregiver while it has an active binding', async () => {
