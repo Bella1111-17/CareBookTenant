@@ -37,7 +37,9 @@
     </el-row>
 
     <el-table v-loading="loading" :data="caregiverList">
-      <el-table-column label="护工ID" width="90" align="center" prop="id" />
+      <el-table-column label="护工ID" width="90" align="center">
+        <template #default="{ $index }">{{ (queryParams.pageNum - 1) * queryParams.pageSize + $index + 1 }}</template>
+      </el-table-column>
       <el-table-column label="姓名" min-width="140" align="center" prop="realName" />
       <el-table-column label="手机号" width="150" align="center" prop="phone" />
       <el-table-column label="护理单元" min-width="160" align="center">

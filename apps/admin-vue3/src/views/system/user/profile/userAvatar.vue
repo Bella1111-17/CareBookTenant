@@ -74,10 +74,25 @@ const title = ref("修改头像");
 
 function resolveAvatarUrl(url) {
   if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) {
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
     return url;
   }
   return import.meta.env.VITE_APP_BASE_API + url;
+}
+
+function canLoadInCropper(url) {
+  if (!url || url.startsWith("data:") || url.startsWith("blob:")) return true;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) return true;
+  try {
+    return new URL(url).origin === window.location.origin;
+  } catch (error) {
+    return false;
+  }
+}
+
+function getCropperImage(url) {
+  const resolvedUrl = resolveAvatarUrl(url);
+  return canLoadInCropper(resolvedUrl) ? resolvedUrl : "";
 }
 
 //图片裁剪数据
@@ -93,6 +108,8 @@ const options = reactive({
 
 /** 编辑头像 */
 function editCropper() {
+  options.img = getCropperImage(userStore.avatar);
+  options.previews = {};
   open.value = true;
 }
 /** 打开弹出层结束时的回调 */
@@ -128,6 +145,10 @@ function beforeUpload(file) {
 }
 /** 上传图片 */
 function uploadImg() {
+  if (!options.img) {
+    proxy.$modal.msgError("请选择要上传的头像图片");
+    return;
+  }
   proxy.$refs.cropper.getCropBlob(data => {
     let formData = new FormData();
     formData.append("avatarfile", data);

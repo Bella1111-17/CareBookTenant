@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { BadRequestException, Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -40,15 +40,33 @@ export class UploadService {
 
   private getOssClient() {
     if (!this.ossClient) {
-      throw new Error('OSS client is not configured');
+      throw new BadRequestException('OSS client is not configured');
     }
     return this.ossClient;
+  }
+
+  private joinPublicUrl(domain: string, fileName: string) {
+    const cleanDomain = `${domain || ''}`.replace(/\/+$/, '');
+    const cleanFileName = `${fileName || ''}`.replace(/^\/+/, '');
+    return cleanFileName ? `${cleanDomain}/${cleanFileName}` : cleanDomain;
+  }
+
+  private getRequiredConfig(key: string) {
+    const value = this.config.get<string>(key);
+    if (!value || value.startsWith('${')) {
+      throw new BadRequestException(`${key} is not configured`);
+    }
+    return value;
   }
 
   /**
    * 单文件上传
    */
   async singleFileUpload(file: Express.Multer.File) {
+    if (!file) {
+      return ResultData.fail(400, '请选择要上传的文件');
+    }
+
     const fileSize = (file.size / 1024 / 1024).toFixed(2);
     if (Number(fileSize) > this.config.get('app.file.maxSize')) {
       return ResultData.fail(500, `文件大小不能超过${this.config.get('app.file.maxSize')}MB`);
@@ -146,7 +164,7 @@ export class UploadService {
     await this.thunkStreamMerge(sourceFilesDir, targetFile);
 
     const relativeFilePath = targetFile.replace(baseDirPath, '');
-    const url = path.posix.join(this.config.get('app.file.domain'), fileName);
+    const url = this.joinPublicUrl(this.config.get('app.file.domain'), fileName);
     const key = path.posix.join('test', relativeFilePath);
     const data = {
       fileName: key,
@@ -157,7 +175,7 @@ export class UploadService {
 
     if (!this.isLocal) {
       await this.uploadLargeFileOss(targetFile, key, uploadId);
-      data.url = `${this.config.get('oss.domain')}/${key}`;
+      data.url = this.joinPublicUrl(this.config.get('oss.domain'), key);
       await this.sysUploadEntityRep.save({
         uploadId,
         ...data,
@@ -236,7 +254,7 @@ export class UploadService {
     fs.writeFileSync(targetFile, file.buffer);
 
     const fileName = path.posix.join(this.config.get('app.file.serveRoot'), relativeFilePath);
-    const url = path.posix.join(this.config.get('app.file.domain'), fileName);
+    const url = this.joinPublicUrl(this.config.get('app.file.domain'), fileName);
     return {
       fileName: fileName,
       newFileName: newFileName,
@@ -263,11 +281,16 @@ export class UploadService {
     const newFileName = `${GenerateUUID()}_${new Date().getTime()}${ext}`;
     const targetKey = targetDir ? `${targetDir}/${newFileName}` : newFileName;
 
-    await this.getOssClient().put(targetKey, file.buffer, {
-      headers: { 'x-oss-object-acl': 'public-read' },
-    });
+    try {
+      await this.getOssClient().put(targetKey, file.buffer, {
+        headers: { 'x-oss-object-acl': 'public-read' },
+      });
+    } catch (error) {
+      console.error('阿里云OSS上传失败:', error);
+      throw new BadRequestException('OSS上传失败，请检查OSS配置、Bucket权限和服务器网络');
+    }
 
-    const url = `${this.config.get('oss.domain')}/${targetKey}`;
+    const url = this.joinPublicUrl(this.getRequiredConfig('oss.domain'), targetKey);
     return {
       fileName: targetKey,
       newFileName: newFileName,

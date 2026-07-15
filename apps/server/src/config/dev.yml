@@ -57,23 +57,43 @@ perm:
         { path: '/upload', method: 'POST' },
         { path: '/hardware/badge/callback', method: 'POST' },
       ]
-
+# 深圳悦航益科技 (yuehangyi) 智能工牌对接配置
 hardwareAudio:
   apiBaseUrl: 'https://api.yuehangyi.com/'
-  appId: '${TOB_HARDWARE_APP_ID}'
-  appSecret: '${TOB_HARDWARE_APP_SECRET}'
-  callbackSecret: '${TOB_HARDWARE_CALLBACK_SECRET}'
-  publicDomain: 'http://localhost:8081'
+  appId: 'app_8175498808361654xgxSx'
+  appSecret: '2ZhN70NjcOvORLq9zsk6CfmLw2Doesax'
+  callbackSecret: ''
+  publicDomain: 'https://carebook.cn-beijing.taihangpkx.cn'
   ossPrefix: 'hardware-audio'
 
+wechat:
+  appId: 'wxc82dee9f749e74f6'
+  appSecret: 'dca1176178d56c85573a84f724b87ba9'
+  subscribeTemplates:
+    careDailyReport:
+      id: 'GHhxiyLWanNpFJv0fcIZNDmLrSyF_PUwyxJiRYXI2bI'
+      code: 'care_daily_report_notice'
+      title: '健康报告生成提醒'
+      page: '/pages/report-detail/index'
+  pay:
+    enabled: true
+    mchId: '1747293439'
+    mchSerialNo: '33FF9A1235D7E56428D9FBEA1D54C9CF2920468F'
+    apiV3Key: 'lKRuG7ZwlxOH1gyBZSkv1nZfIy3bavvn'
+    notifyUrl: 'https://admin.care.zbcare.cn/prod-api/wechat/pay/notify'
+    privateKeyPath: 'apps/server/secrets/wechat/apiclient_key.pem'
+    platformCertPath: 'apps/server/secrets/wechat/pub_key.pem'
+
+# 阿里云百炼 DashScope — 语音识别 & 大模型
 dashscope:
-  apiKey: '${TOB_DASHSCOPE_API_KEY}'
+  apiKey: 'sk-ws-H.RYIMRXP.7Gnz.MEUCIEcGZBohs4R5h8YTxn4cstkS71W19WZrJsmlc8q5LsqHAiEAmukvcbCFXaRCXJiQiwbKarzMkzdcmVlSjFMt90_f814'
   asrModel: 'fun-asr'
   baseUrl: 'https://dashscope.aliyuncs.com'
 
+# Dify AI 工作流平台 — 日报生成
 dify:
-  baseUrl: '${TOB_DIFY_BASE_URL}'
-  badgeDailyReportKey: '${TOB_DIFY_BADGE_DAILY_REPORT_KEY}'
+  baseUrl: 'http://8.153.70.109/v1'
+  badgeDailyReportKey: 'app-yN1BlkRvKbm5Z1ekskHJ8ZuR'
 
 user:
   initialPassword: '123456'

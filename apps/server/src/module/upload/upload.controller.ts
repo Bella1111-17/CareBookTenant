@@ -28,6 +28,7 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   async singleFileUpload(@UploadedFile() file: Express.Multer.File) {
     const res = await this.uploadService.singleFileUpload(file);
+    if (res instanceof ResultData) return res;
     return ResultData.ok(res);
   }
 

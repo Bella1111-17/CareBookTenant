@@ -72,6 +72,7 @@ export class MainController {
     type: RegisterDto,
     required: true,
   })
+  @NotRequireAuth()
   @Post('/register')
   @HttpCode(200)
   register(@Body() user: RegisterDto) {
@@ -81,6 +82,7 @@ export class MainController {
   @ApiOperation({
     summary: '账号自助-是否开启用户注册功能',
   })
+  @NotRequireAuth()
   @Get('/registerUser')
   async registerUser() {
     const res = await this.configService.getConfigValue('sys.account.registerUser');
@@ -91,6 +93,7 @@ export class MainController {
   @ApiOperation({
     summary: '获取验证码图片',
   })
+  @NotRequireAuth()
   @Get('/captchaImage')
   async captchaImage() {
     const enable = await this.configService.getConfigValue('sys.account.captchaEnabled');

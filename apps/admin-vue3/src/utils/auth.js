@@ -1,25 +1,26 @@
-import Cookies from 'js-cookie'
+import cache from '@/plugins/cache'
 
 const TokenKey = 'Admin-Token'
 const RefreshTokenKey = 'Admin-Refresh-Token'
+// Scope auth tokens to the current browser tab so platform and tenant users can coexist.
 
 export function getToken() {
-  return Cookies.get(TokenKey)
+  return cache.session.get(TokenKey)
 }
 
 export function setToken(token) {
-  return Cookies.set(TokenKey, token)
+  return cache.session.set(TokenKey, token)
 }
 
 export function getRefreshToken() {
-  return Cookies.get(RefreshTokenKey)
+  return cache.session.get(RefreshTokenKey)
 }
 
 export function setRefreshToken(token) {
-  return Cookies.set(RefreshTokenKey, token)
+  return cache.session.set(RefreshTokenKey, token)
 }
 
 export function removeToken() {
-  Cookies.remove(TokenKey)
-  return Cookies.remove(RefreshTokenKey)
+  cache.session.remove(TokenKey)
+  return cache.session.remove(RefreshTokenKey)
 }

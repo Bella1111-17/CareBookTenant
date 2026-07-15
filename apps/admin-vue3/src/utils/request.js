@@ -89,6 +89,11 @@ service.interceptors.response.use(res => {
     }
     if (code === 401) {
       const originalRequest = res.config || {}
+      const isPublicRequest = originalRequest.headers?.isToken === false
+      if (isPublicRequest) {
+        ElNotification.error({ title: msg })
+        return Promise.reject(new Error(msg))
+      }
       const refreshTokenValue = getRefreshToken()
       if (!originalRequest.url?.includes('/refresh-token') && !originalRequest._retry && refreshTokenValue) {
         if (isRefreshing) {

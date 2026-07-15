@@ -9,6 +9,7 @@ import { UserService } from 'src/module/system/user/user.service';
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   private globalWhiteList = [];
+  private readonly globalPrefix: string;
   constructor(
     private readonly reflector: Reflector,
     @Inject(UserService)
@@ -17,6 +18,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   ) {
     super();
     this.globalWhiteList = [].concat(this.config.get('perm.router.whitelist') || []);
+    this.globalPrefix = this.normalizePath(this.config.get<string>('app.prefix') || '');
   }
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -68,15 +70,39 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   checkWhiteList(ctx: ExecutionContext): boolean {
     const req = ctx.switchToHttp().getRequest();
+    const requestPaths = this.getRequestPaths(req);
     const i = this.globalWhiteList.findIndex((route) => {
       // 请求方法类型相同
       if (!route.method || req.method.toUpperCase() === route.method.toUpperCase()) {
         // 对比 url
-        return !!pathToRegexp(route.path).exec(req.route.path);
+        const routeRegexp = pathToRegexp(route.path);
+        return requestPaths.some((requestPath) => routeRegexp.exec(requestPath));
       }
       return false;
     });
     // 在白名单内 则 进行下一步， i === -1 ，则不在白名单，需要 比对是否有当前接口权限
     return i > -1;
+  }
+
+  private getRequestPaths(req: any): string[] {
+    const rawPaths = [req.route?.path, req.path, req.originalUrl, req.url]
+      .filter(Boolean)
+      .map((item: string) => this.normalizePath(item));
+    const paths = new Set<string>();
+
+    rawPaths.forEach((item) => {
+      paths.add(item);
+      if (this.globalPrefix && item.startsWith(`${this.globalPrefix}/`)) {
+        paths.add(this.normalizePath(item.slice(this.globalPrefix.length)));
+      }
+    });
+
+    return [...paths];
+  }
+
+  private normalizePath(pathValue: string): string {
+    const pathWithoutQuery = pathValue.split('?')[0] || '/';
+    const normalized = pathWithoutQuery.startsWith('/') ? pathWithoutQuery : `/${pathWithoutQuery}`;
+    return normalized.length > 1 ? normalized.replace(/\/+$/, '') : normalized;
   }
 }

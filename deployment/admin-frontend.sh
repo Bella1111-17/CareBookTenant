@@ -72,6 +72,7 @@ rm -f "$REMOTE_TMP"
 find "$BASE" -mindepth 1 -maxdepth 1 \
     ! -name 'server' \
     ! -name '.well-known' \
+    ! -name '.user.ini' \
     -exec mv {} "$BACKUP_DIR"/ \;
 
 find "$STAGE_DIR" -mindepth 1 -maxdepth 1 -exec mv {} "$BASE"/ \;

@@ -105,6 +105,21 @@ function resolveAvatarUrl(url) {
   return import.meta.env.VITE_APP_BASE_API + url
 }
 
+function canLoadInCropper(url) {
+  if (!url || url.startsWith('data:') || url.startsWith('blob:')) return true
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return true
+  try {
+    return new URL(url).origin === window.location.origin
+  } catch (error) {
+    return false
+  }
+}
+
+function getCropperImage(url) {
+  const resolvedUrl = resolveAvatarUrl(url)
+  return canLoadInCropper(resolvedUrl) ? resolvedUrl : ''
+}
+
 const resolvedImage = computed(() => resolveAvatarUrl(props.modelValue))
 
 const options = reactive({
@@ -128,7 +143,8 @@ watch(
 )
 
 function editCropper() {
-  options.img = resolvedImage.value
+  options.img = getCropperImage(props.modelValue)
+  options.previews = {}
   open.value = true
 }
 
@@ -170,6 +186,10 @@ function beforeUpload(file) {
 }
 
 function uploadImg() {
+  if (!options.img) {
+    proxy.$modal.msgError('请选择要上传的头像图片')
+    return
+  }
   cropperRef.value?.getCropBlob((data) => {
     const formData = new FormData()
     formData.append('avatarfile', data)

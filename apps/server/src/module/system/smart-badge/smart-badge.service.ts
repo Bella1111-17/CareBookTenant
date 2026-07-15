@@ -257,17 +257,6 @@ export class SmartBadgeService {
 
   private async resolveBindingByDeviceAndTime(deviceNo: string, timestamp: Date): Promise<BadgeResolvedBinding> {
     const userId = await this.findUserByDeviceAndTime(deviceNo, timestamp);
-    let tenantId = await this.resolveTenantId(deviceNo, userId);
-    if (tenantId) {
-      return {
-        userId,
-        tenantId,
-        tenantCaregiverId: null,
-        isolationStatus: 'NORMAL',
-        isolationReason: null,
-      };
-    }
-
     const tenantBinding = await this.tenantBindingRepo
       .createQueryBuilder('b')
       .where('b.deviceNo = :deviceNo', { deviceNo })
@@ -287,7 +276,31 @@ export class SmartBadgeService {
       };
     }
 
-    tenantId = this.currentTenantId();
+    const [deviceTenantBinding] = await this.tenantBindingRepo.query(
+      `
+        SELECT tenant_id AS "tenantId"
+          FROM device_tenant_binding
+         WHERE device_no = $1
+           AND del_flag = '0'
+           AND bind_at <= $2
+           AND (unbind_at IS NULL OR unbind_at >= $2)
+         ORDER BY bind_at DESC
+         LIMIT 1
+      `,
+      [deviceNo, timestamp],
+    );
+    let tenantId = deviceTenantBinding?.tenantId ?? null;
+    if (tenantId) {
+      return {
+        userId,
+        tenantId,
+        tenantCaregiverId: null,
+        isolationStatus: 'NORMAL',
+        isolationReason: null,
+      };
+    }
+
+    tenantId = userId ? await this.resolveTenantId(null, userId) : this.currentTenantId();
     return {
       userId: userId || null,
       tenantId,
@@ -302,8 +315,7 @@ export class SmartBadgeService {
     const normalizedDeviceNo = this.normalizeDeviceNo(deviceNo);
     const seenAt = new Date();
     const binding = await this.resolveBindingByDeviceAndTime(normalizedDeviceNo, seenAt);
-    const device = await this.ensureDeviceRegistered(normalizedDeviceNo, dataType, seenAt, binding.tenantId);
-    binding.tenantId = device?.tenantId ?? binding.tenantId;
+    await this.ensureDeviceRegistered(normalizedDeviceNo, dataType, seenAt, binding.tenantId);
 
     switch (dataType) {
       case 'Audio':
@@ -332,6 +344,7 @@ export class SmartBadgeService {
 
   async handleAudio(data: AudioPushData, deviceNo: string, binding: BadgeResolvedBinding) {
     const startTime = this.parseYYMMDDHHmmss(data.startTime) || new Date();
+    binding = await this.resolveBindingByDeviceAndTime(deviceNo, startTime);
     const endTime = data.endTime ? this.parseYYMMDDHHmmss(data.endTime) : null;
     const chunkIndex = this.parseChunkIndex(data.chunkIndex) ?? this.extractChunkFromFileName(data.fileName);
     const segmentType = this.extractSegmentType(data.fileName);
@@ -377,6 +390,7 @@ export class SmartBadgeService {
 
   async handleUploadLog(data: UploadLogPushData, deviceNo: string, binding: BadgeResolvedBinding) {
     const startTime = data.realStartTime ? new Date(data.realStartTime) : new Date();
+    binding = await this.resolveBindingByDeviceAndTime(deviceNo, startTime);
     const endTime = data.realEndTime ? new Date(data.realEndTime) : null;
     const ossKey = data.objectStoreUrl || '';
     const fileUrl = data.fileDownLoadUrl || (ossKey ? this.buildPublicUrl(ossKey) : '');
@@ -541,6 +555,8 @@ export class SmartBadgeService {
   }
 
   async handleMergeAudio(data: MergeAudioPushData, deviceNo: string, binding: BadgeResolvedBinding) {
+    const startTime = data.startTime ? new Date(data.startTime) : new Date();
+    binding = await this.resolveBindingByDeviceAndTime(deviceNo, startTime);
     const ossKey = data.objectStoreUrl || '';
     const fileUrl = data.fileDownLoadUrl || (ossKey ? this.buildPublicUrl(ossKey) : '');
     const existing = await this.audioRepo.findOne({ where: { fileName: data.fileName } });
@@ -571,7 +587,7 @@ export class SmartBadgeService {
         fileUrl,
         sizeBytes: data.size || null,
         chunkIndex: null,
-        startTime: data.startTime ? new Date(data.startTime) : new Date(),
+        startTime,
         endTime: data.endTime ? new Date(data.endTime) : null,
         transcribeStatus: 'PENDING',
         isolationStatus: binding.isolationStatus,

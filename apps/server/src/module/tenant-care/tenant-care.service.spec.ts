@@ -235,7 +235,7 @@ describe('TenantCareService tenant isolation', () => {
     expect(audioQb.andWhere).toHaveBeenCalledWith('a.fileName = :fileName', {
       fileName: 'BG868668088921593-260704182511260704183511-A057-00000000.mp3',
     });
-    expect(audioQb.andWhere).not.toHaveBeenCalledWith('a.tenantId = :tenantId', expect.anything());
+    expect(audioQb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('tenantScopeTenantId'), expect.anything());
     expect(audioQb.andWhere).not.toHaveBeenCalledWith('a.isolationStatus = :isolationStatus', expect.anything());
     expect(reportRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -348,7 +348,20 @@ describe('TenantCareService tenant isolation', () => {
     expect(qb.innerJoin).toHaveBeenCalledWith(TenantBadgeBindingEntity, 'b', expect.stringContaining('b.unbindAt IS NULL'), expect.any(Object));
   });
 
-  it('filters GPS logs by device tenant ownership, not only log tenant_id', async () => {
+  it('does not tenant-scope GPS logs for platform users without selected tenant', async () => {
+    const qb = createQueryBuilderMock();
+    gpsRepo.createQueryBuilder.mockReturnValue(qb);
+    tenantContextService.isPlatformUser.mockReturnValue(true);
+    tenantContextService.getTenantId.mockReturnValue(null);
+
+    await service.listGpsLogs({ pageNum: 1, pageSize: 10 } as any);
+
+    expect(qb.leftJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = g.deviceNo'), expect.any(Object));
+    expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('tenantScopeTenantId'), expect.anything());
+    expect(qb.orderBy).toHaveBeenCalledWith('g.reportTime', 'DESC', 'NULLS LAST');
+  });
+
+  it('filters GPS logs for tenant users by device distribution history', async () => {
     const qb = createQueryBuilderMock();
     gpsRepo.createQueryBuilder.mockReturnValue(qb);
     tenantContextService.isPlatformUser.mockReturnValue(false);
@@ -356,16 +369,28 @@ describe('TenantCareService tenant isolation', () => {
 
     await service.listGpsLogs({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
 
-    expect(qb.innerJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = g.deviceNo'), expect.any(Object));
-    expect(qb.andWhere).toHaveBeenCalledWith('d.tenantId = :tenantScopeTenantId', {
+    expect(qb.leftJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = g.deviceNo'), expect.any(Object));
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
       tenantScopeTenantId: 'tenant-a',
     });
-    expect(qb.andWhere).not.toHaveBeenCalledWith('g.tenantId = :tenantScopeTenantId', expect.anything());
+    expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('g.tenantId = :tenantScopeTenantId'), expect.anything());
     expect(qb.orderBy).toHaveBeenCalledWith('g.reportTime', 'DESC', 'NULLS LAST');
     expect(qb.orderBy).not.toHaveBeenCalledWith('COALESCE(g.reportTime, g.createdAt)', expect.anything());
   });
 
-  it('filters device events by device tenant ownership, not only log tenant_id', async () => {
+  it('does not tenant-scope device events for platform users without selected tenant', async () => {
+    const qb = createQueryBuilderMock();
+    eventRepo.createQueryBuilder.mockReturnValue(qb);
+    tenantContextService.isPlatformUser.mockReturnValue(true);
+    tenantContextService.getTenantId.mockReturnValue(null);
+
+    await service.listDeviceEvents({ pageNum: 1, pageSize: 10 } as any);
+
+    expect(qb.leftJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = e.deviceNo'), expect.any(Object));
+    expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('tenantScopeTenantId'), expect.anything());
+  });
+
+  it('filters device events for tenant users by device distribution history', async () => {
     const qb = createQueryBuilderMock();
     eventRepo.createQueryBuilder.mockReturnValue(qb);
     tenantContextService.isPlatformUser.mockReturnValue(false);
@@ -373,11 +398,63 @@ describe('TenantCareService tenant isolation', () => {
 
     await service.listDeviceEvents({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
 
-    expect(qb.innerJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = e.deviceNo'), expect.any(Object));
-    expect(qb.andWhere).toHaveBeenCalledWith('d.tenantId = :tenantScopeTenantId', {
+    expect(qb.leftJoin).toHaveBeenCalledWith(expect.any(Function), 'd', expect.stringContaining('d.deviceNo = e.deviceNo'), expect.any(Object));
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
       tenantScopeTenantId: 'tenant-a',
     });
-    expect(qb.andWhere).not.toHaveBeenCalledWith('e.tenantId = :tenantScopeTenantId', expect.anything());
+    expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('e.tenantId = :tenantScopeTenantId'), expect.anything());
+  });
+
+  it('filters record list for tenant users by device distribution history', async () => {
+    const qb = createQueryBuilderMock();
+    audioRepo.createQueryBuilder.mockReturnValue(qb);
+    tenantContextService.isPlatformUser.mockReturnValue(false);
+    tenantContextService.getTenantId.mockReturnValue('tenant-a');
+
+    await service.listRecords({ pageNum: 1, pageSize: 10, tenantId: 'tenant-b' } as any);
+
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
+      tenantScopeTenantId: 'tenant-a',
+    });
+    expect(qb.andWhere).not.toHaveBeenCalledWith(expect.stringContaining('a.tenantId = :tenantScopeTenantId'), expect.anything());
+  });
+
+  it('uses device distribution history when generating tenant daily report chunks', async () => {
+    const audioQb = createQueryBuilderMock();
+    const reportQb = createQueryBuilderMock();
+    const startTime = new Date('2026-07-04T18:25:11+08:00');
+    const endTime = new Date('2026-07-04T18:35:11+08:00');
+    audioQb.getMany.mockResolvedValue([
+      {
+        deviceNo: 'BADGE-001',
+        fileName: 'BADGE-001-260704182511260704183511-A057-00000000.mp3',
+        startTime,
+        endTime,
+        asrStatus: 'SUCCESS',
+        transcriptText: 'tenant report text',
+        transcriptRaw: JSON.stringify({ transcripts: [{ content_duration_in_milliseconds: 600000 }] }),
+      },
+    ]);
+    reportQb.getOne.mockResolvedValue(null);
+    audioRepo.createQueryBuilder.mockReturnValue(audioQb);
+    reportRepo.createQueryBuilder.mockReturnValue(reportQb);
+    bindingRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
+    tenantContextService.isPlatformUser.mockReturnValue(false);
+    tenantContextService.getTenantId.mockReturnValue('tenant-a');
+
+    const result = await service.generateDailyReport({
+      deviceNo: 'BADGE-001',
+      dateStr: '2026-07-04',
+    } as any);
+
+    expect(result.code).toBe(200);
+    expect(audioQb.andWhere).toHaveBeenCalledWith(expect.stringContaining('device_tenant_binding dtb'), {
+      tenantScopeTenantId: 'tenant-a',
+    });
+    expect(audioQb.andWhere).not.toHaveBeenCalledWith('a.tenantId = :tenantId', expect.anything());
+    expect(audioQb.andWhere).toHaveBeenCalledWith('a.isolationStatus = :isolationStatus', {
+      isolationStatus: 'NORMAL',
+    });
   });
 
   it('normalizes Dify outputs when result is empty and fields are top-level', () => {

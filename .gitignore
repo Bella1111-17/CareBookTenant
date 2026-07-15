@@ -28,6 +28,7 @@ apps/wechat-miniprogram/src/manifest.json
 apps/wechat-miniprogram/src/pages.json
 bun.lockb
 apps/server/secrets/
+apps/server/upload-tob/
 
 # Repomix
 repomix-index.xml

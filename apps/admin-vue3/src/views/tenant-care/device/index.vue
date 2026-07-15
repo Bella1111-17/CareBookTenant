@@ -102,7 +102,7 @@
         <el-table v-loading="tenantBindingLoading" :data="tenantBindingList">
           <el-table-column label="设备号" min-width="170" align="center" prop="deviceNo" />
           <el-table-column label="机构" min-width="160" align="center">
-            <template #default="{ row }">{{ row.tenantName || tenantName(row.tenantId) || row.tenantId }}</template>
+            <template #default="{ row }">{{ row.tenantName ?? tenantName(row.tenantId) ?? row.tenantId }}</template>
           </el-table-column>
           <el-table-column label="状态" width="100" align="center">
             <template #default="{ row }">
@@ -296,8 +296,8 @@
           <div class="flow-header__value">{{ flowDeviceNo }}</div>
         </div>
         <div>
-          <div class="flow-header__label">当前机构</div>
-          <div class="flow-header__value">{{ tenantName(flowCurrentTenantId) || flowCurrentTenantId || '平台库存' }}</div>
+          <div class="flow-header__label">{{ isPlatformUser ? '当前机构' : '当前护工' }}</div>
+          <div class="flow-header__value">{{ isPlatformUser ? (tenantName(flowCurrentTenantId) ?? flowCurrentTenantId ?? '平台库存') : (flowCurrentCaregiverName || '-') }}</div>
         </div>
       </div>
       <el-timeline class="device-flow">
@@ -414,6 +414,7 @@ const flowLoading = ref(false)
 const flowTitle = ref('设备流转')
 const flowDeviceNo = ref('')
 const flowCurrentTenantId = ref('')
+const flowCurrentCaregiverName = ref('')
 const flowList = ref([])
 
 function defaultTenantId() {
@@ -704,9 +705,11 @@ function openFlowDialog(row) {
   flowTitle.value = `设备流转 - ${row.deviceNo}`
   flowDeviceNo.value = row.deviceNo
   flowCurrentTenantId.value = row.effectiveTenantId || row.tenantId || ''
+  flowCurrentCaregiverName.value = ''
   tenantDeviceFlow({ deviceNo: row.deviceNo, tenantId: isPlatformUser.value ? deviceQuery.tenantId : defaultTenantId() })
     .then((res) => {
       flowCurrentTenantId.value = res.data?.currentTenantId || flowCurrentTenantId.value
+      flowCurrentCaregiverName.value = res.data?.currentCaregiverName || ''
       flowList.value = res.data?.list || []
     })
     .finally(() => {
